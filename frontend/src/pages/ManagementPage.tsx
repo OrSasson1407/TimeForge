@@ -1,0 +1,163 @@
+import { useState } from 'react'
+import { useAuth } from '../state/AuthContext'
+import { EntityManager } from '../features/management/EntityManager'
+import {
+  classConfig,
+  lessonRequirementConfig,
+  roomConfig,
+  schoolDayConfig,
+  subjectConfig,
+  teacherConfig,
+  timePeriodConfig,
+} from '../features/management/entityConfigs'
+import {
+  classHooks,
+  lessonRequirementHooks,
+  roomHooks,
+  schoolDayHooks,
+  subjectHooks,
+  teacherHooks,
+  timePeriodHooks,
+} from '../hooks/useCatalog'
+
+const TABS = [
+  'Teachers',
+  'Classes',
+  'Subjects',
+  'Rooms',
+  'School Days',
+  'Time Periods',
+  'Lesson Requirements',
+] as const
+
+type Tab = (typeof TABS)[number]
+
+export function ManagementPage() {
+  const { user } = useAuth()
+  const [tab, setTab] = useState<Tab>('Teachers')
+  const schoolId = user?.school_id
+
+  return (
+    <div>
+      <h1>School Management</h1>
+      <nav aria-label="Management sections">
+        {TABS.map((t) => (
+          <button
+            type="button"
+            key={t}
+            onClick={() => setTab(t)}
+            aria-current={tab === t ? 'true' : undefined}
+          >
+            {t}
+          </button>
+        ))}
+      </nav>
+
+      {tab === 'Teachers' && <TeachersTab schoolId={schoolId} />}
+      {tab === 'Classes' && <ClassesTab schoolId={schoolId} />}
+      {tab === 'Subjects' && <SubjectsTab schoolId={schoolId} />}
+      {tab === 'Rooms' && <RoomsTab schoolId={schoolId} />}
+      {tab === 'School Days' && <SchoolDaysTab schoolId={schoolId} />}
+      {tab === 'Time Periods' && <TimePeriodsTab schoolId={schoolId} />}
+      {tab === 'Lesson Requirements' && <LessonRequirementsTab schoolId={schoolId} />}
+    </div>
+  )
+}
+
+function TeachersTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = teacherHooks.useList(schoolId)
+  const upsert = teacherHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={teacherConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function ClassesTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = classHooks.useList(schoolId)
+  const upsert = classHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={classConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function SubjectsTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = subjectHooks.useList(schoolId)
+  const upsert = subjectHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={subjectConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function RoomsTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = roomHooks.useList(schoolId)
+  const upsert = roomHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={roomConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function SchoolDaysTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = schoolDayHooks.useList(schoolId)
+  const upsert = schoolDayHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={schoolDayConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function TimePeriodsTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = timePeriodHooks.useList(schoolId)
+  const upsert = timePeriodHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={timePeriodConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}
+
+function LessonRequirementsTab({ schoolId }: { schoolId: string | undefined }) {
+  const { data } = lessonRequirementHooks.useList(schoolId)
+  const upsert = lessonRequirementHooks.useUpsert(schoolId)
+  return (
+    <EntityManager
+      config={lessonRequirementConfig}
+      entities={data ?? []}
+      isSaving={upsert.isPending}
+      saveError={upsert.error instanceof Error ? upsert.error.message : null}
+      onSave={(id, body) => upsert.mutate({ id, body })}
+    />
+  )
+}

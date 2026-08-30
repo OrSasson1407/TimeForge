@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// Deny-by-default. All business writes go through the backend (Firebase
+// Admin SDK), which bypasses these rules — they exist as defense-in-depth
+// read guards, not the primary authorization mechanism.
+// See docs/05-DATABASE.md #10 and docs/03-ARCHITECTURE.md #33.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+
+    match /schools/{schoolId}/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /schedules/{scheduleId}/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if false;
+    }
+
+    match /auditEvents/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Deny anything not explicitly matched above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
