@@ -6,6 +6,7 @@ all through real HTTP requests against the FastAPI app. This is what proves
 end-to-end, not just individually unit-tested.
 """
 
+from dataclasses import replace
 from datetime import time
 
 from app.domain.models import (
@@ -216,3 +217,37 @@ def test_generate_is_admin_only(api: ApiFixtures) -> None:
     response = api.client.post("/schedules/generate?school_id=s1", json={"request_id": "req-1"})
 
     assert response.status_code == 403
+
+
+def test_violations_endpoint_reflects_the_persisted_state(api: ApiFixtures) -> None:
+    """A freshly generated draft is hard-constraint-clean. Corrupting it
+    directly at the repository (bypassing apply-move's own re-validation,
+    the same way an externally-constructed state is exercised elsewhere —
+    see HardConstraint.violations_in's docstring) proves the endpoint is a
+    real full-state scan, not just an echo of validate-move's last check."""
+    _seed_minimal_solvable_school(api)
+    api.admin()
+
+    generate_response = api.client.post(
+        "/schedules/generate?school_id=s1", json={"request_id": "req-1"}
+    )
+    version_id = generate_response.json()["version"]["id"]
+
+    clean_response = api.client.get(f"/schedules/versions/{version_id}/violations?school_id=s1")
+    assert clean_response.status_code == 200
+    assert clean_response.json() == []
+
+    assignments = api.schedule_versions.list_assignments("s1", version_id)
+    target, other = assignments[0], assignments[1]
+    collided = replace(other, day_id=target.day_id, time_period_id=target.time_period_id)
+    api.schedule_versions.apply_assignment_change(
+        "s1", version_id, collided, expected_version_tag=0
+    )
+
+    dirty_response = api.client.get(f"/schedules/versions/{version_id}/violations?school_id=s1")
+    assert dirty_response.status_code == 200
+    violations = dirty_response.json()
+    assert len(violations) > 0
+    involved = {entity for v in violations for entity in v["involved_entities"]}
+    assert target.lesson_id in involved
+    assert other.lesson_id in involved

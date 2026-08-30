@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import { useReportDisruption } from '../../hooks/useRescheduling'
+import { useLanguage } from '../../state/LanguageContext'
 import type { ReschedulingEventType } from '../../types/rescheduling'
 import type { SchoolDay, TimePeriod, Teacher, Room } from '../../types/catalog'
 
@@ -29,6 +30,7 @@ export function ReportDisruptionPanel({
   rooms,
   onRepaired,
 }: ReportDisruptionPanelProps) {
+  const { t } = useLanguage()
   const [eventType, setEventType] = useState<ReschedulingEventType>('TEACHER_UNAVAILABLE')
   const [targetId, setTargetId] = useState('')
   const [reason, setReason] = useState('')
@@ -76,9 +78,9 @@ export function ReportDisruptionPanel({
 
   return (
     <section>
-      <h3>Report a disruption</h3>
+      <h3>{t('disruption.title')}</h3>
 
-      <label htmlFor="disruption-event-type">What became unavailable</label>
+      <label htmlFor="disruption-event-type">{t('disruption.whatUnavailable')}</label>
       <select
         id="disruption-event-type"
         value={eventType}
@@ -87,15 +89,15 @@ export function ReportDisruptionPanel({
           setTargetId('')
         }}
       >
-        <option value="TEACHER_UNAVAILABLE">A teacher</option>
-        <option value="ROOM_UNAVAILABLE">A room</option>
+        <option value="TEACHER_UNAVAILABLE">{t('disruption.aTeacher')}</option>
+        <option value="ROOM_UNAVAILABLE">{t('disruption.aRoom')}</option>
       </select>
 
       <label htmlFor="disruption-target">
-        {eventType === 'TEACHER_UNAVAILABLE' ? 'Teacher' : 'Room'}
+        {eventType === 'TEACHER_UNAVAILABLE' ? t('disruption.teacher') : t('disruption.room')}
       </label>
       <select id="disruption-target" value={targetId} onChange={(e) => setTargetId(e.target.value)}>
-        <option value="">Select…</option>
+        <option value="">{t('disruption.select')}</option>
         {targetOptions.map((entity) => (
           <option key={entity.id} value={entity.id}>
             {entity.name}
@@ -104,11 +106,11 @@ export function ReportDisruptionPanel({
       </select>
 
       <fieldset>
-        <legend>Affected slots</legend>
+        <legend>{t('disruption.affectedSlots')}</legend>
         <table>
           <thead>
             <tr>
-              <th>Period</th>
+              <th>{t('disruption.period')}</th>
               {activeDays.map((day) => (
                 <th key={day.id}>{day.weekday}</th>
               ))}
@@ -136,7 +138,7 @@ export function ReportDisruptionPanel({
         </table>
       </fieldset>
 
-      <label htmlFor="disruption-reason">Reason</label>
+      <label htmlFor="disruption-reason">{t('disruption.reason')}</label>
       <input id="disruption-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
 
       <button
@@ -144,26 +146,32 @@ export function ReportDisruptionPanel({
         onClick={handleSubmit}
         disabled={report.isPending || !targetId || selectedSlots.size === 0 || !reason}
       >
-        {report.isPending ? 'Repairing…' : 'Report and repair'}
+        {report.isPending ? t('disruption.submitting') : t('disruption.submit')}
       </button>
 
       {report.data && (
         <div role="status">
-          <p>Result: {report.data.status}</p>
+          <p>{t('disruption.result', { status: report.data.status })}</p>
           {report.data.status === 'REPAIRED' && report.data.disruption_cost && (
             <p>
-              Repaired — {report.data.disruption_cost.moved_assignments} moved,{' '}
-              {report.data.disruption_cost.changed_rooms} room change(s),{' '}
-              {report.data.disruption_cost.changed_teachers} teacher change(s).
+              {t('disruption.repaired', {
+                moved: report.data.disruption_cost.moved_assignments,
+                rooms: report.data.disruption_cost.changed_rooms,
+                teachers: report.data.disruption_cost.changed_teachers,
+              })}
             </p>
           )}
           {report.data.status === 'UNREPAIRABLE' && report.data.infeasibility && (
             <div>
-              <p>{report.data.infeasibility.note ?? 'No repair could be found.'}</p>
+              <p>{report.data.infeasibility.note ?? t('disruption.noRepairFound')}</p>
               <ul>
                 {report.data.infeasibility.bottlenecks.map((b, i) => (
                   <li key={i}>
-                    {b.subject_id}: needs {b.required}, only {b.available} available.
+                    {t('disruption.bottleneckLine', {
+                      subject: b.subject_id,
+                      required: b.required,
+                      available: b.available,
+                    })}
                   </li>
                 ))}
               </ul>

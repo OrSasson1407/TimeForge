@@ -41,3 +41,10 @@ class IdentityAdminPort(Protocol):
         before any Firestore User record exists yet — unlike
         `get_current_user`, which requires one."""
         ...
+
+    def revoke_sessions(self, uid: str) -> None:
+        """Invalidates every refresh token issued for this uid so far —
+        the self-service "sign out everywhere" action. Existing ID tokens
+        already in a browser stay valid until they naturally expire (up to
+        one hour); this only stops them from being silently renewed."""
+        ...

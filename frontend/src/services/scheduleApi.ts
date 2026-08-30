@@ -10,6 +10,7 @@ import type {
   ScheduleAssignment,
   ScheduleVersion,
   ValidateMoveResponse,
+  Violation,
 } from '../types/schedule'
 
 export const scheduleApi = {
@@ -28,6 +29,9 @@ export const scheduleApi = {
     apiClient.get<ScheduleAssignment[]>(
       `/schedules/versions/${versionId}/assignments?school_id=${schoolId}`,
     ),
+
+  listViolations: (schoolId: string, versionId: string) =>
+    apiClient.get<Violation[]>(`/schedules/versions/${versionId}/violations?school_id=${schoolId}`),
 
   validateMove: (schoolId: string, versionId: string, move: ProposedMove) =>
     apiClient.post<ValidateMoveResponse>(

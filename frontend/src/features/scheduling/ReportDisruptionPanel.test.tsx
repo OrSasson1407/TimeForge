@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ReportDisruptionPanel } from './ReportDisruptionPanel'
+import { LanguageProvider } from '../../state/LanguageContext'
 import type { ReportDisruptionRequest } from '../../types/rescheduling'
 
 const mutate = vi.fn()
@@ -57,14 +58,16 @@ describe('ReportDisruptionPanel', () => {
   it('disables submit until a target, a slot, and a reason are all set', async () => {
     const user = userEvent.setup()
     render(
-      <ReportDisruptionPanel
-        schoolId="s1"
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onRepaired={vi.fn()}
-      />,
+      <LanguageProvider>
+        <ReportDisruptionPanel
+          schoolId="s1"
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onRepaired={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     const submit = screen.getByRole('button', { name: 'Report and repair' })
@@ -83,14 +86,16 @@ describe('ReportDisruptionPanel', () => {
   it('submits the selected teacher, slot, and reason', async () => {
     const user = userEvent.setup()
     render(
-      <ReportDisruptionPanel
-        schoolId="s1"
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onRepaired={vi.fn()}
-      />,
+      <LanguageProvider>
+        <ReportDisruptionPanel
+          schoolId="s1"
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onRepaired={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     await user.selectOptions(screen.getByLabelText('Teacher'), 't1')
@@ -109,14 +114,16 @@ describe('ReportDisruptionPanel', () => {
   it('switches target options to rooms when the event type changes', async () => {
     const user = userEvent.setup()
     render(
-      <ReportDisruptionPanel
-        schoolId="s1"
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onRepaired={vi.fn()}
-      />,
+      <LanguageProvider>
+        <ReportDisruptionPanel
+          schoolId="s1"
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onRepaired={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     await user.selectOptions(screen.getByLabelText('What became unavailable'), 'ROOM_UNAVAILABLE')

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { EntityManager } from './EntityManager'
 import type { EntityManagerConfig } from './EntityManager'
+import { LanguageProvider } from '../../state/LanguageContext'
 
 interface FakeEntity {
   id: string
@@ -12,10 +13,14 @@ interface FakeUpsert {
   name: string
 }
 
+// Reuses real translation keys rather than inventing test-only ones — the
+// tests below only assert on rendered text ("Name"/"Save"/"Edit"/"ID"),
+// never on which entity's config produced it, so any key resolving to
+// those English strings works.
 const config: EntityManagerConfig<FakeEntity, FakeUpsert> = {
-  title: 'Widgets',
-  fields: [{ key: 'name', label: 'Name', input: 'text' }],
-  columns: [{ key: 'name', label: 'Name', render: (w) => w.name }],
+  titleKey: 'catalog.teachers.title',
+  fields: [{ key: 'name', labelKey: 'catalog.teachers.name', input: 'text' }],
+  columns: [{ key: 'name', labelKey: 'catalog.teachers.name', render: (w) => w.name }],
   toFormState: (w) => ({ name: w.name }),
   emptyFormState: { name: '' },
   toUpsert: (form) => ({ name: form.name }),
@@ -26,13 +31,15 @@ describe('EntityManager', () => {
     const onSave = vi.fn()
     const user = userEvent.setup()
     render(
-      <EntityManager
-        config={config}
-        entities={[]}
-        isSaving={false}
-        saveError={null}
-        onSave={onSave}
-      />,
+      <LanguageProvider>
+        <EntityManager
+          config={config}
+          entities={[]}
+          isSaving={false}
+          saveError={null}
+          onSave={onSave}
+        />
+      </LanguageProvider>,
     )
 
     await user.type(screen.getByLabelText('ID'), 'w1')
@@ -46,13 +53,15 @@ describe('EntityManager', () => {
     const onSave = vi.fn()
     const user = userEvent.setup()
     render(
-      <EntityManager
-        config={config}
-        entities={[{ id: 'w1', name: 'Widget One' }]}
-        isSaving={false}
-        saveError={null}
-        onSave={onSave}
-      />,
+      <LanguageProvider>
+        <EntityManager
+          config={config}
+          entities={[{ id: 'w1', name: 'Widget One' }]}
+          isSaving={false}
+          saveError={null}
+          onSave={onSave}
+        />
+      </LanguageProvider>,
     )
 
     await user.click(screen.getByRole('button', { name: 'Edit' }))
@@ -70,13 +79,15 @@ describe('EntityManager', () => {
 
   it('shows a save error', () => {
     render(
-      <EntityManager
-        config={config}
-        entities={[]}
-        isSaving={false}
-        saveError="Something went wrong"
-        onSave={vi.fn()}
-      />,
+      <LanguageProvider>
+        <EntityManager
+          config={config}
+          entities={[]}
+          isSaving={false}
+          saveError="Something went wrong"
+          onSave={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong')

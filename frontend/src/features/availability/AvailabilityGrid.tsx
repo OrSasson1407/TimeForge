@@ -13,6 +13,7 @@ import type { Availability } from '../../types/availability'
 import type { SchoolDay } from '../../types/catalog'
 import type { TimePeriod } from '../../types/catalog'
 import { useUpsertAvailability } from '../../hooks/useAvailability'
+import { useLanguage } from '../../state/LanguageContext'
 
 interface AvailabilityGridProps {
   schoolId: string
@@ -44,6 +45,7 @@ export function AvailabilityGrid({
   records,
   readOnly = false,
 }: AvailabilityGridProps) {
+  const { t } = useLanguage()
   const upsert = useUpsertAvailability(schoolId)
   const lessonPeriods = periods.filter((p) => p.kind === 'LESSON').sort((a, b) => a.index - b.index)
   const activeDays = days.filter((d) => d.is_active)
@@ -69,7 +71,7 @@ export function AvailabilityGrid({
     <table>
       <thead>
         <tr>
-          <th>Period</th>
+          <th>{t('availability.period')}</th>
           {activeDays.map((day) => (
             <th key={day.id}>{day.weekday}</th>
           ))}
@@ -92,7 +94,7 @@ export function AvailabilityGrid({
                     aria-pressed={available}
                     onClick={() => toggle(day, period)}
                   >
-                    {available ? 'Available' : 'Unavailable'}
+                    {available ? t('availability.available') : t('availability.unavailable')}
                   </button>
                 </td>
               )

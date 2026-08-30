@@ -3,12 +3,14 @@ import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useResendCode, useVerifyCode } from '../hooks/useAuthFlow'
 import { ApiError } from '../services/apiClient'
+import { useLanguage } from '../state/LanguageContext'
 
 const RESEND_COOLDOWN_SECONDS = 60
 
 export function VerifyCodePage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useLanguage()
   const emailFromState = (location.state as { email?: string } | null)?.email
 
   const [email, setEmail] = useState(emailFromState ?? '')
@@ -33,7 +35,7 @@ export function VerifyCodePage() {
       await verifyCode.mutateAsync({ email, code })
       navigate('/login', { state: { verified: true } })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Verification failed.')
+      setError(err instanceof ApiError ? err.message : t('verify.errorGeneric'))
     }
   }
 
@@ -42,21 +44,18 @@ export function VerifyCodePage() {
     setResendMessage(null)
     try {
       await resendCode.mutateAsync(email)
-      setResendMessage('A new code has been sent.')
+      setResendMessage(t('verify.resendSuccess'))
       setCooldown(RESEND_COOLDOWN_SECONDS)
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not resend the code.')
+      setError(err instanceof ApiError ? err.message : t('verify.errorResend'))
     }
   }
 
   return (
     <main className="auth-shell">
       <div className="auth-card">
-        <h1>Check your email</h1>
-        <p className="auth-subtitle">
-          We sent a 6-digit verification code to your email address. Enter it below to confirm your
-          account.
-        </p>
+        <h2>{t('verify.title')}</h2>
+        <p className="auth-subtitle">{t('verify.subtitle')}</p>
 
         {error && (
           <div className="alert alert-danger" role="alert">
@@ -68,7 +67,7 @@ export function VerifyCodePage() {
         <form onSubmit={handleSubmit}>
           {!emailFromState && (
             <div className="field">
-              <label htmlFor="verify-email">Email</label>
+              <label htmlFor="verify-email">{t('verify.email')}</label>
               <input
                 id="verify-email"
                 type="email"
@@ -81,7 +80,7 @@ export function VerifyCodePage() {
           )}
 
           <div className="field">
-            <label htmlFor="verify-code">Verification code</label>
+            <label htmlFor="verify-code">{t('verify.code')}</label>
             <input
               id="verify-code"
               className="code-input"
@@ -100,23 +99,23 @@ export function VerifyCodePage() {
             className="btn btn-primary btn-block"
             disabled={verifyCode.isPending}
           >
-            {verifyCode.isPending ? 'Verifying…' : 'Verify email'}
+            {verifyCode.isPending ? t('verify.submitting') : t('verify.submit')}
           </button>
         </form>
 
         <p className="auth-switch">
-          Didn&apos;t get a code?{' '}
+          {t('verify.noCode')}{' '}
           <button
             type="button"
             className="btn-link"
             onClick={() => void handleResend()}
             disabled={resendCode.isPending || cooldown > 0}
           >
-            {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+            {cooldown > 0 ? t('verify.resendIn', { seconds: cooldown }) : t('verify.resend')}
           </button>
         </p>
         <p className="auth-switch">
-          <Link to="/login">Back to sign in</Link>
+          <Link to="/login">{t('verify.backToSignIn')}</Link>
         </p>
       </div>
     </main>

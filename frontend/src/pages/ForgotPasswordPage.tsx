@@ -2,9 +2,11 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
 
 export function ForgotPasswordPage() {
   const { sendPasswordReset } = useAuth()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
@@ -30,15 +32,11 @@ export function ForgotPasswordPage() {
   return (
     <main className="auth-shell">
       <div className="auth-card">
-        <h1>Reset your password</h1>
-        <p className="auth-subtitle">
-          Enter your account email and we'll send you a link to reset your password.
-        </p>
+        <h2>{t('forgot.title')}</h2>
+        <p className="auth-subtitle">{t('forgot.subtitle')}</p>
 
         {sent ? (
-          <div className="alert alert-success">
-            If an account exists for that email, a reset link is on its way. Check your inbox.
-          </div>
+          <div className="alert alert-success">{t('forgot.sentNotice')}</div>
         ) : (
           <form onSubmit={handleSubmit}>
             {error && (
@@ -47,7 +45,7 @@ export function ForgotPasswordPage() {
               </div>
             )}
             <div className="field">
-              <label htmlFor="forgot-email">Email</label>
+              <label htmlFor="forgot-email">{t('forgot.email')}</label>
               <input
                 id="forgot-email"
                 type="email"
@@ -58,13 +56,13 @@ export function ForgotPasswordPage() {
               />
             </div>
             <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-              {submitting ? 'Sending…' : 'Send reset link'}
+              {submitting ? t('forgot.submitting') : t('forgot.submit')}
             </button>
           </form>
         )}
 
         <p className="auth-switch">
-          <Link to="/login">Back to sign in</Link>
+          <Link to="/login">{t('forgot.backToSignIn')}</Link>
         </p>
       </div>
     </main>

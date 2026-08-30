@@ -5,11 +5,13 @@ import { PasswordStrengthMeter, passwordMeetsAllRules } from '../components/Pass
 import { Recaptcha } from '../components/Recaptcha'
 import { useRegister, usePublicSchools } from '../hooks/useAuthFlow'
 import { ApiError } from '../services/apiClient'
+import { useLanguage } from '../state/LanguageContext'
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const schools = usePublicSchools()
   const register = useRegister()
 
@@ -32,19 +34,19 @@ export function RegisterPage() {
     setFormError(null)
 
     if (!passwordMeetsAllRules(password)) {
-      setFormError('Password does not meet the minimum strength requirements.')
+      setFormError(t('register.errorWeakPassword'))
       return
     }
     if (password !== confirmPassword) {
-      setFormError('Passwords do not match.')
+      setFormError(t('register.errorPasswordMismatch'))
       return
     }
     if (!schoolId) {
-      setFormError('Please select your school.')
+      setFormError(t('register.errorNoSchool'))
       return
     }
     if (!recaptchaToken) {
-      setFormError('Please complete the reCAPTCHA challenge.')
+      setFormError(t('register.errorNoRecaptcha'))
       return
     }
 
@@ -58,7 +60,7 @@ export function RegisterPage() {
       })
       navigate('/verify-email', { state: { email } })
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Registration failed.')
+      setFormError(err instanceof ApiError ? err.message : t('register.errorGeneric'))
     }
   }
 
@@ -67,10 +69,8 @@ export function RegisterPage() {
   return (
     <main className="auth-shell">
       <div className="auth-card">
-        <h1>Create your account</h1>
-        <p className="auth-subtitle">
-          Register, verify your email, and an administrator will approve your access.
-        </p>
+        <h2>{t('register.title')}</h2>
+        <p className="auth-subtitle">{t('register.subtitle')}</p>
 
         {formError && (
           <div className="alert alert-danger" role="alert">
@@ -80,7 +80,7 @@ export function RegisterPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="register-name">Full name</label>
+            <label htmlFor="register-name">{t('register.fullName')}</label>
             <input
               id="register-name"
               type="text"
@@ -92,7 +92,7 @@ export function RegisterPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="register-email">Email</label>
+            <label htmlFor="register-email">{t('register.email')}</label>
             <input
               id="register-email"
               type="email"
@@ -104,7 +104,7 @@ export function RegisterPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="register-school">School</label>
+            <label htmlFor="register-school">{t('register.school')}</label>
             <select
               id="register-school"
               value={schoolId}
@@ -112,7 +112,7 @@ export function RegisterPage() {
               required
             >
               <option value="" disabled>
-                {schools.isLoading ? 'Loading schools…' : 'Select your school'}
+                {schools.isLoading ? t('register.loadingSchools') : t('register.selectSchool')}
               </option>
               {schools.data?.map((school) => (
                 <option key={school.id} value={school.id}>
@@ -123,7 +123,7 @@ export function RegisterPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="register-password">Password</label>
+            <label htmlFor="register-password">{t('register.password')}</label>
             <input
               id="register-password"
               type="password"
@@ -136,7 +136,7 @@ export function RegisterPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="register-confirm-password">Confirm password</label>
+            <label htmlFor="register-confirm-password">{t('register.confirmPassword')}</label>
             <input
               id="register-confirm-password"
               type="password"
@@ -152,18 +152,16 @@ export function RegisterPage() {
               <Recaptcha siteKey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} />
             </div>
           ) : (
-            <p className="field-hint">
-              reCAPTCHA isn't configured for this environment — skipping the challenge.
-            </p>
+            <p className="field-hint">{t('register.recaptchaSkipped')}</p>
           )}
 
           <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Creating account…' : 'Create account'}
+            {submitting ? t('register.submitting') : t('register.submit')}
           </button>
         </form>
 
         <p className="auth-switch">
-          Already have an account? <Link to="/login">Sign in</Link>
+          {t('register.haveAccount')} <Link to="/login">{t('register.signIn')}</Link>
         </p>
       </div>
     </main>

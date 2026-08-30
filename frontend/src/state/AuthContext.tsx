@@ -7,7 +7,7 @@
  * alone (docs/03-ARCHITECTURE.md #23-24: the backend is the sole
  * authorization authority).
  */
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   GoogleAuthProvider,
@@ -21,6 +21,7 @@ import type { User as FirebaseUser } from 'firebase/auth'
 import { auth } from '../services/firebaseAuth'
 import { authApi } from '../services/authApi'
 import { ApiError } from '../services/apiClient'
+import { useLanguage } from './LanguageContext'
 import type { User } from '../types/auth'
 
 interface OAuthProfile {
@@ -57,6 +58,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { t } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -70,39 +72,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ordering guarantee that `auth.currentUser` is updated before listeners
   // fire. `refreshUser` (called with no argument, from outside the
   // listener) is the one legitimate case that still needs the live value.
-  async function resolveCurrentUser(firebaseUser: FirebaseUser | null = auth.currentUser) {
-    if (!firebaseUser) {
-      setUser(null)
-      setNeedsOnboarding(false)
-      setOauthProfile(null)
-      return
-    }
-    try {
-      const resolved = await authApi.me()
-      setUser(resolved)
-      setNeedsOnboarding(false)
-      setError(null)
-    } catch (err) {
-      setUser(null)
-      // A signed-in Firebase identity implies the ID token itself is
-      // fresh/valid — the only realistic reason /auth/me then returns 401
-      // is "no TimeForge User record for this uid" (see
-      // backend/app/infrastructure/firebase/auth.py's resolve_user), which
-      // means this is a first-time OAuth sign-in that still needs
-      // CompleteProfilePage, not a real error.
-      if (err instanceof ApiError && err.status === 401) {
-        setNeedsOnboarding(true)
-        setOauthProfile({
-          displayName: firebaseUser.displayName,
-          email: firebaseUser.email,
-        })
-        setError(null)
-      } else {
+  const resolveCurrentUser = useCallback(
+    async (firebaseUser: FirebaseUser | null = auth.currentUser) => {
+      if (!firebaseUser) {
+        setUser(null)
         setNeedsOnboarding(false)
-        setError('Signed in with Firebase, but no matching TimeForge account was found.')
+        setOauthProfile(null)
+        return
       }
-    }
-  }
+      try {
+        const resolved = await authApi.me()
+        setUser(resolved)
+        setNeedsOnboarding(false)
+        setError(null)
+      } catch (err) {
+        setUser(null)
+        // A signed-in Firebase identity implies the ID token itself is
+        // fresh/valid — the only realistic reason /auth/me then returns 401
+        // is "no TimeForge User record for this uid" (see
+        // backend/app/infrastructure/firebase/auth.py's resolve_user), which
+        // means this is a first-time OAuth sign-in that still needs
+        // CompleteProfilePage, not a real error.
+        if (err instanceof ApiError && err.status === 401) {
+          setNeedsOnboarding(true)
+          setOauthProfile({
+            displayName: firebaseUser.displayName,
+            email: firebaseUser.email,
+          })
+          setError(null)
+        } else {
+          setNeedsOnboarding(false)
+          setError(t('login.noMatchingAccount'))
+        }
+      }
+    },
+    [t],
+  )
 
   useEffect(() => {
     return onAuthStateChanged(auth, (firebaseUser) => {
@@ -116,14 +121,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       void resolveCurrentUser(firebaseUser).finally(() => setLoading(false))
     })
-  }, [])
+  }, [resolveCurrentUser])
 
   async function signIn(email: string, password: string) {
     setError(null)
     try {
       await signInWithEmailAndPassword(auth, email, password)
     } catch {
-      setError('Invalid email or password.')
+      setError(t('login.invalidCredentials'))
       throw new Error('sign-in failed')
     }
   }
@@ -133,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider())
     } catch {
-      setError('Google sign-in failed or was cancelled.')
+      setError(t('login.googleFailed'))
       throw new Error('google sign-in failed')
     }
   }

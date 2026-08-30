@@ -1,19 +1,21 @@
 import { useReschedulingEvents } from '../../hooks/useRescheduling'
+import { useLanguage } from '../../state/LanguageContext'
 
 export function ReschedulingEventsList({ schoolId }: { schoolId: string }) {
+  const { t } = useLanguage()
   const { data: events } = useReschedulingEvents(schoolId)
 
   return (
     <section>
-      <h3>Disruption history</h3>
+      <h3>{t('disruptionHistory.title')}</h3>
       <table>
         <thead>
           <tr>
-            <th>Reported</th>
-            <th>Type</th>
-            <th>Target</th>
-            <th>Affected slots</th>
-            <th>Reason</th>
+            <th>{t('disruptionHistory.reported')}</th>
+            <th>{t('disruptionHistory.type')}</th>
+            <th>{t('disruptionHistory.target')}</th>
+            <th>{t('disruptionHistory.affectedSlots')}</th>
+            <th>{t('disruptionHistory.reason')}</th>
           </tr>
         </thead>
         <tbody>
@@ -32,7 +34,7 @@ export function ReschedulingEventsList({ schoolId }: { schoolId: string }) {
           ))}
           {events && events.length === 0 && (
             <tr>
-              <td colSpan={5}>No disruptions reported yet.</td>
+              <td colSpan={5}>{t('disruptionHistory.empty')}</td>
             </tr>
           )}
         </tbody>

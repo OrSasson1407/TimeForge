@@ -97,3 +97,7 @@ class FirebaseIdentityAdmin:
 
     def verify_token(self, token: str) -> str:
         return verify_id_token(token).uid
+
+    def revoke_sessions(self, uid: str) -> None:
+        with contextlib.suppress(FirebaseError):
+            get_auth_client().revoke_refresh_tokens(uid)

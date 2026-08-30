@@ -339,6 +339,7 @@ class FakeIdentityAdmin:
         self._email_by_uid: dict[str, str] = {}
         self.verified_uids: set[str] = set()
         self.disabled_uids: set[str] = set()
+        self.revoked_uids: set[str] = set()
 
     def create_user(self, *, email: str, password: str, display_name: str) -> str:
         del password, display_name
@@ -376,6 +377,9 @@ class FakeIdentityAdmin:
         the OAuth-completion endpoint's own logic (docs/07-CODE_STANDARDS.md
         #23)."""
         return token
+
+    def revoke_sessions(self, uid: str) -> None:
+        self.revoked_uids.add(uid)
 
     def register_known_account(self, *, uid: str, email: str) -> None:
         """Test helper: seeds an email<->uid mapping without going through

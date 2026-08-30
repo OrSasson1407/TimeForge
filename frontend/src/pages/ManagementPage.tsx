@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
+import type { TranslationKey } from '../i18n/translations'
 import { EntityManager } from '../features/management/EntityManager'
+import { TeacherCsvImport } from '../features/management/TeacherCsvImport'
 import {
   classConfig,
   lessonRequirementConfig,
@@ -32,23 +35,34 @@ const TABS = [
 
 type Tab = (typeof TABS)[number]
 
+const TAB_TITLE_KEY: Record<Tab, TranslationKey> = {
+  Teachers: 'catalog.teachers.title',
+  Classes: 'catalog.classes.title',
+  Subjects: 'catalog.subjects.title',
+  Rooms: 'catalog.rooms.title',
+  'School Days': 'catalog.schoolDays.title',
+  'Time Periods': 'catalog.timePeriods.title',
+  'Lesson Requirements': 'catalog.lessonRequirements.title',
+}
+
 export function ManagementPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [tab, setTab] = useState<Tab>('Teachers')
   const schoolId = user?.school_id
 
   return (
     <div>
-      <h1>School Management</h1>
-      <nav aria-label="Management sections">
-        {TABS.map((t) => (
+      <h2>{t('management.title')}</h2>
+      <nav aria-label={t('management.sectionsAriaLabel')}>
+        {TABS.map((tabName) => (
           <button
             type="button"
-            key={t}
-            onClick={() => setTab(t)}
-            aria-current={tab === t ? 'true' : undefined}
+            key={tabName}
+            onClick={() => setTab(tabName)}
+            aria-current={tab === tabName ? 'true' : undefined}
           >
-            {t}
+            {t(TAB_TITLE_KEY[tabName])}
           </button>
         ))}
       </nav>
@@ -68,13 +82,16 @@ function TeachersTab({ schoolId }: { schoolId: string | undefined }) {
   const { data } = teacherHooks.useList(schoolId)
   const upsert = teacherHooks.useUpsert(schoolId)
   return (
-    <EntityManager
-      config={teacherConfig}
-      entities={data ?? []}
-      isSaving={upsert.isPending}
-      saveError={upsert.error instanceof Error ? upsert.error.message : null}
-      onSave={(id, body) => upsert.mutate({ id, body })}
-    />
+    <>
+      <TeacherCsvImport onImport={(id, body) => upsert.mutateAsync({ id, body })} />
+      <EntityManager
+        config={teacherConfig}
+        entities={data ?? []}
+        isSaving={upsert.isPending}
+        saveError={upsert.error instanceof Error ? upsert.error.message : null}
+        onSave={(id, body) => upsert.mutate({ id, body })}
+      />
+    </>
   )
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
 import { schoolDayHooks, timePeriodHooks, teacherHooks, classHooks } from '../hooks/useCatalog'
 import { useAvailabilityForOwner } from '../hooks/useAvailability'
 import { AvailabilityGrid } from '../features/availability/AvailabilityGrid'
@@ -7,6 +8,7 @@ import type { OwnerType } from '../types/enums'
 
 export function AvailabilityPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const schoolId = user?.school_id
   const isAdmin = user?.role === 'ADMIN'
 
@@ -25,16 +27,16 @@ export function AvailabilityPage() {
   )
 
   if (!isAdmin && !user?.teacher_id) {
-    return <p>Your account has no linked teacher record, so there is no availability to submit.</p>
+    return <p>{t('availability.noTeacherRecord')}</p>
   }
 
   return (
     <main>
-      <h2>Availability</h2>
+      <h2>{t('availability.title')}</h2>
 
       {isAdmin && (
         <div>
-          <label htmlFor="availability-owner-type">Owner type</label>
+          <label htmlFor="availability-owner-type">{t('availability.ownerType')}</label>
           <select
             id="availability-owner-type"
             value={ownerType}
@@ -43,19 +45,19 @@ export function AvailabilityPage() {
               setOwnerId('')
             }}
           >
-            <option value="TEACHER">Teacher</option>
-            <option value="CLASS">Class</option>
+            <option value="TEACHER">{t('availability.teacher')}</option>
+            <option value="CLASS">{t('availability.class')}</option>
           </select>
 
           <label htmlFor="availability-owner-id">
-            {ownerType === 'TEACHER' ? 'Teacher' : 'Class'}
+            {ownerType === 'TEACHER' ? t('availability.teacher') : t('availability.class')}
           </label>
           <select
             id="availability-owner-id"
             value={ownerId}
             onChange={(e) => setOwnerId(e.target.value)}
           >
-            <option value="">Select…</option>
+            <option value="">{t('availability.select')}</option>
             {(ownerType === 'TEACHER' ? teachers : classes)?.map((entity) => (
               <option key={entity.id} value={entity.id}>
                 {entity.id} — {entity.name}
@@ -75,7 +77,7 @@ export function AvailabilityPage() {
           records={records ?? []}
         />
       ) : (
-        <p>{effectiveOwnerId ? 'Loading…' : 'Select an owner to view their availability.'}</p>
+        <p>{effectiveOwnerId ? t('availability.loading') : t('availability.selectOwner')}</p>
       )}
     </main>
   )

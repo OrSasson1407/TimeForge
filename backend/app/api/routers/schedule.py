@@ -15,6 +15,7 @@ from app.api.dependencies import (
     get_compare_versions_use_case,
     get_current_user,
     get_generate_schedule_use_case,
+    get_list_violations_use_case,
     get_publish_schedule_use_case,
     get_reschedule_use_case,
     get_rescheduling_event_repository,
@@ -59,6 +60,7 @@ from app.application.use_cases import (
     AssignmentDiff,
     CompareVersionsUseCase,
     GenerateScheduleUseCase,
+    ListViolationsUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
     ValidateMoveUseCase,
@@ -131,6 +133,25 @@ def list_schedule_assignments(
     repository: ScheduleVersionRepository = Depends(get_schedule_version_repository),
 ) -> list[ScheduleAssignmentResponse]:
     return [assignment_to_response(a) for a in repository.list_assignments(school_id, version_id)]
+
+
+@router.get("/versions/{version_id}/violations", response_model=list[ViolationResponse])
+def list_version_violations(
+    version_id: str,
+    school_id: str = Query(...),
+    _user: User = Depends(get_current_user),
+    use_case: ListViolationsUseCase = Depends(get_list_violations_use_case),
+) -> list[ViolationResponse]:
+    violations = use_case.execute(school_id, school_id, version_id)
+    return [
+        ViolationResponse(
+            constraint_id=v.constraint_id,
+            severity=v.severity,
+            message=v.message,
+            involved_entities=list(v.involved_entities),
+        )
+        for v in violations
+    ]
 
 
 @router.post("/versions/{version_id}/validate-move", response_model=ValidateMoveResponse)
