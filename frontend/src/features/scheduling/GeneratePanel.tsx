@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGenerateSchedule } from '../../hooks/useSchedule'
+import { useLanguage } from '../../state/LanguageContext'
 
 interface GeneratePanelProps {
   schoolId: string
@@ -11,6 +12,7 @@ interface GeneratePanelProps {
  * (with the bottleneck report), FAILED/TIMEOUT (with whatever detail the
  * backend returned). Never invents a success it didn't get. */
 export function GeneratePanel({ schoolId, onGenerated }: GeneratePanelProps) {
+  const { t } = useLanguage()
   const [reason, setReason] = useState('')
   const generate = useGenerateSchedule(schoolId)
 
@@ -23,42 +25,57 @@ export function GeneratePanel({ schoolId, onGenerated }: GeneratePanelProps) {
 
   return (
     <section>
-      <h3>Generate a schedule</h3>
-      <label htmlFor="generate-reason">Reason (optional)</label>
+      <h3>{t('generate.title')}</h3>
+      <label htmlFor="generate-reason">{t('generate.reason')}</label>
       <input id="generate-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
       <button type="button" onClick={handleGenerate} disabled={generate.isPending}>
-        {generate.isPending ? 'Generating…' : 'Generate'}
+        {generate.isPending ? t('generate.submitting') : t('generate.submit')}
       </button>
 
       {generate.data && (
         <div role="status">
-          <p>Status: {generate.data.status}</p>
+          <p>{t('generate.status', { status: generate.data.status })}</p>
           {generate.data.status === 'VALID' && generate.data.version && (
             <p>
-              Created draft version {generate.data.version.id} with{' '}
-              {generate.data.version.assignment_count} assignments
+              {t('generate.createdDraft', {
+                id: generate.data.version.id,
+                count: generate.data.version.assignment_count,
+              })}
               {generate.data.version.score && (
-                <> — quality {generate.data.version.score.quality.toFixed(1)}/100</>
+                <>
+                  {t('generate.qualitySuffix', {
+                    quality: generate.data.version.score.quality.toFixed(1),
+                  })}
+                </>
               )}
               .
             </p>
           )}
           {generate.data.status === 'INFEASIBLE' && generate.data.infeasibility && (
             <div>
-              <p>{generate.data.infeasibility.note ?? 'No valid schedule could be found.'}</p>
+              <p>{generate.data.infeasibility.note ?? t('generate.infeasibleDefault')}</p>
               <ul>
                 {generate.data.infeasibility.bottlenecks.map((b, i) => (
                   <li key={i}>
-                    {b.subject_id}
-                    {b.required_capability ? ` (needs ${b.required_capability})` : ''}: needs{' '}
-                    {b.required}, only {b.available} available (short by {b.shortage}).
+                    {t('generate.bottleneckLine', {
+                      subject: b.subject_id,
+                      capability: b.required_capability
+                        ? t('generate.bottleneckCapability', { capability: b.required_capability })
+                        : '',
+                      required: b.required,
+                      available: b.available,
+                      shortage: b.shortage,
+                    })}
                   </li>
                 ))}
               </ul>
             </div>
           )}
           {(generate.data.status === 'FAILED' || generate.data.status === 'TIMEOUT') && (
-            <p>{generate.data.error ?? `Generation ended with status ${generate.data.status}.`}</p>
+            <p>
+              {generate.data.error ??
+                t('generate.endedWithStatus', { status: generate.data.status })}
+            </p>
           )}
         </div>
       )}

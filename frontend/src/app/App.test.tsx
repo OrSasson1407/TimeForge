@@ -19,9 +19,13 @@ vi.mock('firebase/auth', () => ({
   signOut: vi.fn(),
 }))
 
-vi.mock('../services/apiClient', () => ({
-  apiClient: { get: vi.fn().mockResolvedValue({ status: 'ok' }) },
-}))
+vi.mock('../services/apiClient', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/apiClient')>()
+  return {
+    ...actual,
+    apiClient: { get: vi.fn().mockResolvedValue({ status: 'ok' }) },
+  }
+})
 
 vi.mock('../services/authApi', () => ({ authApi: { me: vi.fn() } }))
 

@@ -33,6 +33,7 @@ from app.application.use_cases import (
     ApplyMoveUseCase,
     CompareVersionsUseCase,
     GenerateScheduleUseCase,
+    ListViolationsUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
     ValidateMoveUseCase,
@@ -254,6 +255,36 @@ def get_validate_move_use_case(
     ),
 ) -> ValidateMoveUseCase:
     return ValidateMoveUseCase(
+        schedule_version_repository=schedule_version_repository,
+        teacher_repository=teacher_repository,
+        class_repository=class_repository,
+        room_repository=room_repository,
+        requirement_repository=requirement_repository,
+        availability_repository=availability_repository,
+        school_day_repository=school_day_repository,
+        time_period_repository=time_period_repository,
+        scheduling_config_repository=scheduling_config_repository,
+    )
+
+
+def get_list_violations_use_case(
+    schedule_version_repository: ScheduleVersionRepository = Depends(
+        get_schedule_version_repository
+    ),
+    teacher_repository: TeacherRepository = Depends(get_teacher_repository),
+    class_repository: ClassRepository = Depends(get_class_repository),
+    room_repository: RoomRepository = Depends(get_room_repository),
+    requirement_repository: LessonRequirementRepository = Depends(
+        get_lesson_requirement_repository
+    ),
+    availability_repository: AvailabilityRepository = Depends(get_availability_repository),
+    school_day_repository: SchoolDayRepository = Depends(get_school_day_repository),
+    time_period_repository: TimePeriodRepository = Depends(get_time_period_repository),
+    scheduling_config_repository: SchedulingConfigRepository = Depends(
+        get_scheduling_config_repository
+    ),
+) -> ListViolationsUseCase:
+    return ListViolationsUseCase(
         schedule_version_repository=schedule_version_repository,
         teacher_repository=teacher_repository,
         class_repository=class_repository,

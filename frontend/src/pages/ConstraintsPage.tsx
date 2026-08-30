@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
 import { useSchedulingConfig, useUpdateSchedulingConfig } from '../hooks/useSchedulingConfig'
 import type { SchedulingConfig } from '../types/schedulingConfig'
 
 export function ConstraintsPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const schoolId = user?.school_id
   const { data: config } = useSchedulingConfig(schoolId)
   const update = useUpdateSchedulingConfig(schoolId)
@@ -15,7 +17,7 @@ export function ConstraintsPage() {
     if (config) setDraft(config)
   }, [config])
 
-  if (!draft) return <p>Loading…</p>
+  if (!draft) return <p>{t('availability.loading')}</p>
 
   function setWeight(constraintId: string, value: number) {
     setDraft((prev) =>
@@ -30,7 +32,7 @@ export function ConstraintsPage() {
 
   return (
     <main>
-      <h2>Constraint Configuration</h2>
+      <h2>{t('constraints.title')}</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -38,7 +40,7 @@ export function ConstraintsPage() {
         }}
       >
         <fieldset>
-          <legend>Soft-constraint weights</legend>
+          <legend>{t('constraints.softWeights')}</legend>
           {Object.entries(draft.soft_constraint_weights)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([constraintId, weight]) => (
@@ -57,9 +59,9 @@ export function ConstraintsPage() {
         </fieldset>
 
         <fieldset>
-          <legend>Solver parameters</legend>
+          <legend>{t('constraints.solverParams')}</legend>
           <div>
-            <label htmlFor="config-timeout">Timeout (seconds)</label>
+            <label htmlFor="config-timeout">{t('constraints.timeoutSeconds')}</label>
             <input
               id="config-timeout"
               type="number"
@@ -69,7 +71,7 @@ export function ConstraintsPage() {
             />
           </div>
           <div>
-            <label htmlFor="config-seed">Random seed</label>
+            <label htmlFor="config-seed">{t('constraints.randomSeed')}</label>
             <input
               id="config-seed"
               type="number"
@@ -78,7 +80,7 @@ export function ConstraintsPage() {
             />
           </div>
           <div>
-            <label htmlFor="config-quality-decay">Quality decay (k)</label>
+            <label htmlFor="config-quality-decay">{t('constraints.qualityDecay')}</label>
             <input
               id="config-quality-decay"
               type="number"
@@ -91,10 +93,10 @@ export function ConstraintsPage() {
         </fieldset>
 
         <button type="submit" disabled={update.isPending}>
-          {update.isPending ? 'Saving…' : 'Save'}
+          {update.isPending ? t('constraints.saving') : t('constraints.save')}
         </button>
         {update.isError && <p role="alert">{(update.error as Error).message}</p>}
-        {update.isSuccess && <p>Saved.</p>}
+        {update.isSuccess && <p>{t('constraints.saved')}</p>}
       </form>
     </main>
   )

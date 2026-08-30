@@ -374,3 +374,14 @@ def test_complete_oauth_profile_rejects_an_existing_profile(api: ApiFixtures) ->
     )
 
     assert response.status_code == 409
+
+
+def test_revoke_sessions_revokes_the_callers_own_refresh_tokens(api: ApiFixtures) -> None:
+    teacher = api.teacher(school_id="s1", user_id="teacher_1", teacher_id="t1")
+
+    response = api.client.post("/auth/security/revoke-sessions")
+
+    assert response.status_code == 200
+    assert teacher.id in api.identity_admin.revoked_uids
+    events = api.audit.list_for_entity(AuditEntityType.USER, teacher.id)
+    assert any(e.operation == "USER_SESSIONS_REVOKED" for e in events)

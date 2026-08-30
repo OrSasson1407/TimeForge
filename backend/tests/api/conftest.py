@@ -125,10 +125,13 @@ def api() -> Iterator[ApiFixtures]:
     register_rate_limiter = RateLimiter(max_calls=1000, window_seconds=3600)
     resend_rate_limiter = RateLimiter(max_calls=1000, window_seconds=900)
     # password_check_breached defaults to True (real behavior); tests force
-    # it off so the suite never makes a live network call to HaveIBeenPwned
-    # (recaptcha_secret_key is already None by default, so verify_recaptcha
-    # is already a no-op — see app/core/security.py).
-    test_settings = Settings(password_check_breached=False)
+    # it off so the suite never makes a live network call to HaveIBeenPwned.
+    # recaptcha_secret_key is forced to None too — Settings() still loads
+    # backend/.env (env_file isn't disabled here), so without this override
+    # a real RECAPTCHA_SECRET_KEY in that file would make verify_recaptcha
+    # attempt a real network call against the tests' fake token and reject
+    # every registration in the suite (see app/core/security.py).
+    test_settings = Settings(password_check_breached=False, recaptcha_secret_key=None)
 
     app.dependency_overrides[get_school_repository] = lambda: schools
     app.dependency_overrides[get_teacher_repository] = lambda: teachers

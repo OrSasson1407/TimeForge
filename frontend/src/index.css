@@ -1,43 +1,86 @@
+/**
+ * Design system: "Precision Engineering" (docs/07-CODE_STANDARDS.md #9) —
+ * generated via Stitch, adapted from its "Precision Engineering Light"
+ * spec. Deliberately sharp and flat: 0px corners everywhere, depth from
+ * 1px borders rather than shadows, indigo (#4338ca family) as the sole
+ * accent. Dark mode reuses the same shape language with a hand-tuned
+ * indigo-500/400 accent scale (the Stitch dark spec's Material-derived
+ * light-fill/dark-text button pattern was judged too unusual to carry
+ * over — a conventional accessible dark accent was used instead).
+ */
+
 :root {
-  --color-text: #1f2328;
-  --color-text-muted: #57606a;
-  --color-bg: #f6f8fa;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f9fafb;
   --color-surface: #ffffff;
-  --color-border: #d0d7de;
-  --color-accent: #2f6feb;
-  --color-accent-hover: #1a56d6;
+  --color-border: #e5e7eb;
+  --color-text: #191c1d;
+  --color-text-heading: #1e1b4b;
+  --color-text-muted: #464554;
+  --color-accent: #4338ca;
+  --color-accent-hover: #362da3;
   --color-accent-contrast: #ffffff;
-  --color-success: #1a7f37;
-  --color-success-bg: #dafbe1;
-  --color-danger: #cf222e;
-  --color-danger-bg: #ffebe9;
-  --color-warning: #9a6700;
-  --color-warning-bg: #fff8c5;
-  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --shadow: 0 1px 2px rgba(31, 35, 40, 0.06), 0 8px 24px rgba(31, 35, 40, 0.08);
+  --color-success: #059669;
+  --color-success-bg: #ecfdf5;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --radius: 0;
+  --radius-sm: 0;
+  --shadow: none;
+  --gutter: 24px;
+  --margin-desktop: 40px;
+  --sidebar-width: 260px;
   color-scheme: light dark;
 }
 
+/* Three-state theme: this media query is the "system" default, overridable
+   by the explicit toggle's `data-theme` attribute on <html> (state/
+   ThemeContext.tsx) in either direction — :not([data-theme="light"]) below
+   lets an explicit "dark" choice combine with a light-OS user, and the
+   :root[data-theme="dark"] block afterward covers a dark-OS user who
+   explicitly chose "light" (the media query would otherwise still win). */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --color-text: #e6edf3;
-    --color-text-muted: #9198a1;
-    --color-bg: #0d1117;
-    --color-surface: #161b22;
-    --color-border: #30363d;
-    --color-accent: #4c8dff;
-    --color-accent-hover: #79aeff;
-    --color-accent-contrast: #0d1117;
-    --color-success: #3fb950;
-    --color-success-bg: #12261b;
-    --color-danger: #f85149;
-    --color-danger-bg: #2a1315;
-    --color-warning: #d29922;
-    --color-warning-bg: #2b2111;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  :root:not([data-theme='light']) {
+    --color-bg: #09090b;
+    --color-bg-alt: #18181b;
+    --color-surface: #18181b;
+    --color-border: #27272a;
+    --color-text: #e4e4e7;
+    --color-text-heading: #c7d2fe;
+    --color-text-muted: #a1a1aa;
+    --color-accent: #6366f1;
+    --color-accent-hover: #818cf8;
+    --color-accent-contrast: #ffffff;
+    --color-success: #34d399;
+    --color-success-bg: rgba(52, 211, 153, 0.12);
+    --color-danger: #f87171;
+    --color-danger-bg: rgba(248, 113, 113, 0.12);
+    --color-warning: #fbbf24;
+    --color-warning-bg: rgba(251, 191, 36, 0.12);
   }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #09090b;
+  --color-bg-alt: #18181b;
+  --color-surface: #18181b;
+  --color-border: #27272a;
+  --color-text: #e4e4e7;
+  --color-text-heading: #c7d2fe;
+  --color-text-muted: #a1a1aa;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-contrast: #ffffff;
+  --color-success: #34d399;
+  --color-success-bg: rgba(52, 211, 153, 0.12);
+  --color-danger: #f87171;
+  --color-danger-bg: rgba(248, 113, 113, 0.12);
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.12);
 }
 
 * {
@@ -47,6 +90,8 @@
 body {
   margin: 0;
   font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
   color: var(--color-text);
   background: var(--color-bg);
 }
@@ -55,18 +100,197 @@ body {
   min-height: 100vh;
 }
 
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--gutter) 1.25rem;
+}
+
+@media (min-width: 1025px) {
+  main {
+    padding: var(--gutter) var(--margin-desktop);
+  }
+}
+
 h1,
 h2,
-h3 {
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--color-text-heading);
   line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+@media (min-width: 641px) {
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+p {
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* --- Technical, uppercase micro-labels (Stitch's "label-mono" style) —
+   used for form field labels and table column headers, to read like a
+   labeled instrument rather than a generic consumer form. --- */
+.label-mono,
+.field label,
+th {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* --- Header / navigation --- */
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+}
+
+@media (min-width: 1025px) {
+  header {
+    padding: 0.85rem var(--margin-desktop);
+  }
+}
+
+header h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+header nav a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+header nav a:hover {
+  color: var(--color-text);
+}
+
+header nav a.active {
+  color: var(--color-text-heading);
+  border-bottom-color: var(--color-accent);
+}
+
+header nav span {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* --- Base form elements (bare <input>/<select>/<button>, for pages that
+   don't opt into the .field/.btn primitives below) --- */
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.55em 0.7em;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5em 0.9em;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --- Tables --- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th {
+  text-align: left;
+  padding: 0.6em 0.75em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+td {
+  padding: 0.6em 0.75em;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
 }
 
 /* --- Shared form primitives (docs/07-CODE_STANDARDS.md #9: reused across
    Login/Register/Verify rather than styled per page) --- */
-
-button {
-  font-family: inherit;
-}
 
 .btn {
   display: inline-flex;
@@ -93,21 +317,22 @@ button {
 .btn-primary {
   background: var(--color-accent);
   color: var(--color-accent-contrast);
+  border-color: var(--color-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--color-surface);
   border-color: var(--color-border);
-  color: var(--color-text);
+  color: var(--color-accent);
 }
 
 .btn-secondary:hover:not(:disabled) {
   border-color: var(--color-accent);
-  color: var(--color-accent);
 }
 
 .btn-block {
@@ -127,15 +352,9 @@ button {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.35em;
+  gap: 0.4em;
   margin-bottom: 1.1em;
-  text-align: left;
-}
-
-.field label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
+  text-align: start;
 }
 
 .field input,
@@ -146,7 +365,7 @@ button {
   background: var(--color-surface);
   color: var(--color-text);
   font-size: 0.95rem;
-  font-family: inherit;
+  font-family: var(--font-sans);
 }
 
 .field input:focus,
@@ -230,7 +449,6 @@ button {
 
 .password-strength-bar {
   height: 4px;
-  border-radius: 2px;
   background: var(--color-border);
   overflow: hidden;
 }
@@ -267,12 +485,430 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Status chip — rectangular per the Precision Engineering spec (no pill
+   shapes), low-opacity functional-color fill with high-saturation text. */
 .pending-badge {
   display: inline-block;
   padding: 0.2em 0.6em;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   background: var(--color-warning-bg);
   color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+}
+
+/* --- Accessibility: skip link + focus visibility --- */
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 1rem;
+  top: -3rem;
+  z-index: 200;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  padding: 0.6em 1em;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- Spinner --- */
+
+.spinner {
+  display: inline-flex;
+}
+
+.spinner-circle {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%; /* the one deliberate exception to the sharp-corner
+    system — an indicator of motion reads as a circle, not a square */
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Skeleton loading --- */
+
+.skeleton {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-bg-alt) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner-circle,
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* --- Empty state --- */
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.empty-state-title {
+  font-family: var(--font-display);
+  color: var(--color-text-heading);
+  font-weight: 600;
+  margin: 0 0 0.4em;
+}
+
+/* --- Toasts --- */
+
+.toast-stack {
+  position: fixed;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 360px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.75em 1em;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-text-muted);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+
+.toast-success {
+  border-inline-start-color: var(--color-success);
+}
+
+.toast-error {
+  border-inline-start-color: var(--color-danger);
+}
+
+.toast-warning {
+  border-inline-start-color: var(--color-warning);
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-action {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.toast-dismiss {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* --- Offline banner --- */
+
+.offline-banner {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border-bottom: 1px solid var(--color-warning);
+  text-align: center;
+  padding: 0.5em 1em;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* --- Theme / language toggles (header controls) --- */
+
+.theme-toggle,
+.language-option {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35em 0.6em;
+}
+
+.theme-toggle:hover,
+.language-option:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.language-toggle {
+  display: inline-flex;
+}
+
+.language-option.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+/* --- Modal (keyboard shortcuts help, etc.) --- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.shortcuts-list {
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.shortcuts-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.shortcuts-row dt {
+  margin: 0;
+}
+
+.shortcuts-row dd {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: center;
+  padding: 0.15em 0.45em;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-bottom-width: 2px;
+}
+
+/* --- Notification bell --- */
+
+.notification-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.notification-bell:hover {
+  border-color: var(--color-accent);
+}
+
+.notification-count {
+  position: absolute;
+  top: -0.4em;
+  inset-inline-end: -0.4em;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 1.2em;
+  text-align: center;
+  padding: 0.1em 0.3em;
+  line-height: 1.2;
+}
+
+/* --- Command palette --- */
+
+.command-palette {
+  max-width: 480px;
+  padding: 0;
+}
+
+.command-palette-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.9em 1em;
+  font-size: 1rem;
+}
+
+.command-palette-input:focus {
+  outline: none;
+}
+
+.command-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5em;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.command-palette-item {
+  display: block;
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: none;
+  padding: 0.6em 0.75em;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.command-palette-item.active {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+/* --- Print (Schedule page's timetable) --- */
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5em;
+  }
+
+  body,
+  main {
+    background: #fff;
+    color: #000;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    color: #000;
+  }
+}
+
+.timetable-cell-draggable {
+  cursor: grab;
+}
+
+.timetable-cell-dragging {
+  opacity: 0.4;
+}
+
+.timetable-cell-violation {
+  background: var(--color-danger-bg);
+}
+
+.timetable-violation-icon {
+  margin-inline-end: 0.3em;
+}
+
+.timetable-cell-drop-checking {
+  background: var(--color-surface-muted, rgba(128, 128, 128, 0.12));
+  outline: 2px dashed var(--color-border);
+  outline-offset: -2px;
+}
+
+.timetable-cell-drop-valid {
+  background: var(--color-success-bg);
+  outline: 2px solid var(--color-success);
+  outline-offset: -2px;
+}
+
+.timetable-cell-drop-warning {
+  background: var(--color-warning-bg);
+  outline: 2px solid var(--color-warning);
+  outline-offset: -2px;
+}
+
+.timetable-cell-drop-invalid {
+  background: var(--color-danger-bg);
+  outline: 2px solid var(--color-danger);
+  outline-offset: -2px;
 }

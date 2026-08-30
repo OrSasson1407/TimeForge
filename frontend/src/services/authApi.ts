@@ -30,4 +30,5 @@ export const authApi = {
   listUsers: () => apiClient.get<AdminUser[]>('/users'),
   suspendUser: (userId: string) => apiClient.post<User>(`/users/${userId}/suspend`),
   reactivateUser: (userId: string) => apiClient.post<User>(`/users/${userId}/reactivate`),
+  revokeSessions: () => apiClient.post<MessageResponse>('/auth/security/revoke-sessions'),
 }

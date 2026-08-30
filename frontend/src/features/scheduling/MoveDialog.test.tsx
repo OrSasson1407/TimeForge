@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { MoveDialog } from './MoveDialog'
+import { LanguageProvider } from '../../state/LanguageContext'
 import type {
   ProposedMove,
   ScheduleAssignment,
@@ -106,16 +107,18 @@ describe('MoveDialog', () => {
   it('disables Apply until a successful Validate for the exact current form', async () => {
     const user = userEvent.setup()
     render(
-      <MoveDialog
-        schoolId="s1"
-        version={version}
-        assignment={assignment}
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onClose={vi.fn()}
-      />,
+      <LanguageProvider>
+        <MoveDialog
+          schoolId="s1"
+          version={version}
+          assignment={assignment}
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onClose={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
@@ -134,16 +137,18 @@ describe('MoveDialog', () => {
   it('re-locks Apply after the form changes past validation', async () => {
     const user = userEvent.setup()
     render(
-      <MoveDialog
-        schoolId="s1"
-        version={version}
-        assignment={assignment}
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onClose={vi.fn()}
-      />,
+      <LanguageProvider>
+        <MoveDialog
+          schoolId="s1"
+          version={version}
+          assignment={assignment}
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onClose={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     await user.click(screen.getByRole('button', { name: 'Validate' }))
@@ -158,16 +163,18 @@ describe('MoveDialog', () => {
   it('never enables Apply when validation reports INVALID', async () => {
     const user = userEvent.setup()
     render(
-      <MoveDialog
-        schoolId="s1"
-        version={version}
-        assignment={assignment}
-        days={days}
-        periods={periods}
-        teachers={teachers}
-        rooms={rooms}
-        onClose={vi.fn()}
-      />,
+      <LanguageProvider>
+        <MoveDialog
+          schoolId="s1"
+          version={version}
+          assignment={assignment}
+          days={days}
+          periods={periods}
+          teachers={teachers}
+          rooms={rooms}
+          onClose={vi.fn()}
+        />
+      </LanguageProvider>,
     )
 
     await user.selectOptions(screen.getByLabelText('Teacher'), 't_blocked')

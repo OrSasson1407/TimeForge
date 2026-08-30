@@ -2,9 +2,11 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
 
 export function LoginPage() {
   const { signIn, signInWithGoogle, error } = useAuth()
+  const { t } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
   const verifiedNotice = (location.state as { verified?: boolean } | null)?.verified
@@ -48,15 +50,10 @@ export function LoginPage() {
   return (
     <main className="auth-shell">
       <div className="auth-card">
-        <h1>Welcome back</h1>
-        <p className="auth-subtitle">Sign in to your TimeForge account.</p>
+        <h2>{t('login.title')}</h2>
+        <p className="auth-subtitle">{t('login.subtitle')}</p>
 
-        {verifiedNotice && (
-          <div className="alert alert-success">
-            Email verified. Your account is awaiting administrator approval — you can sign in in the
-            meantime.
-          </div>
-        )}
+        {verifiedNotice && <div className="alert alert-success">{t('login.verifiedNotice')}</div>}
         {error && (
           <div className="alert alert-danger" role="alert">
             {error}
@@ -65,7 +62,7 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="login-email">Email</label>
+            <label htmlFor="login-email">{t('login.email')}</label>
             <input
               id="login-email"
               type="email"
@@ -76,7 +73,7 @@ export function LoginPage() {
             />
           </div>
           <div className="field">
-            <label htmlFor="login-password">Password</label>
+            <label htmlFor="login-password">{t('login.password')}</label>
             <input
               id="login-password"
               type="password"
@@ -86,17 +83,17 @@ export function LoginPage() {
               required
             />
           </div>
-          <p className="field-hint" style={{ textAlign: 'right', marginBottom: '1em' }}>
-            <Link to="/forgot-password">Forgot password?</Link>
+          <p className="field-hint" style={{ textAlign: 'end', marginBottom: '1em' }}>
+            <Link to="/forgot-password">{t('login.forgotPassword')}</Link>
           </p>
           <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Signing in…' : 'Sign in'}
+            {submitting ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
 
         <div
           role="separator"
-          aria-label="or"
+          aria-label={t('login.or')}
           style={{
             textAlign: 'center',
             margin: '1.25em 0',
@@ -104,7 +101,7 @@ export function LoginPage() {
             fontSize: '0.8rem',
           }}
         >
-          or
+          {t('login.or')}
         </div>
 
         <button
@@ -113,11 +110,11 @@ export function LoginPage() {
           onClick={() => void handleGoogleSignIn()}
           disabled={googleSubmitting}
         >
-          {googleSubmitting ? 'Connecting…' : 'Continue with Google'}
+          {googleSubmitting ? t('login.googleConnecting') : t('login.google')}
         </button>
 
         <p className="auth-switch">
-          Don&apos;t have an account? <Link to="/register">Create one</Link>
+          {t('login.noAccount')} <Link to="/register">{t('login.createOne')}</Link>
         </p>
       </div>
     </main>

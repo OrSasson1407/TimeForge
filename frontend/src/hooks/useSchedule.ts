@@ -42,6 +42,14 @@ export function useScheduleAssignments(
   })
 }
 
+export function useScheduleViolations(schoolId: string | undefined, versionId: string | undefined) {
+  return useQuery({
+    queryKey: ['schedule-violations', schoolId, versionId],
+    queryFn: () => scheduleApi.listViolations(schoolId!, versionId!),
+    enabled: !!schoolId && !!versionId,
+  })
+}
+
 export function useCompareVersions(
   schoolId: string | undefined,
   fromVersionId: string | undefined,
@@ -86,6 +94,9 @@ export function useApplyMove(schoolId: string | undefined, versionId: string | u
       })
       void queryClient.invalidateQueries({ queryKey: ['schedule-version', schoolId, versionId] })
       void queryClient.invalidateQueries({ queryKey: ['schedule-versions', schoolId] })
+      void queryClient.invalidateQueries({
+        queryKey: ['schedule-violations', schoolId, versionId],
+      })
     },
   })
 }

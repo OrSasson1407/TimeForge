@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAuth } from '../state/AuthContext'
+import { useLanguage } from '../state/LanguageContext'
 import {
   classHooks,
   roomHooks,
@@ -7,7 +8,12 @@ import {
   teacherHooks,
   timePeriodHooks,
 } from '../hooks/useCatalog'
-import { useSchedule, useScheduleAssignments, useScheduleVersion } from '../hooks/useSchedule'
+import {
+  useSchedule,
+  useScheduleAssignments,
+  useScheduleVersion,
+  useScheduleViolations,
+} from '../hooks/useSchedule'
 import { GeneratePanel } from '../features/scheduling/GeneratePanel'
 import { VersionPicker } from '../features/scheduling/VersionPicker'
 import { CompareView } from '../features/scheduling/CompareView'
@@ -24,6 +30,7 @@ function nameMap(entities: { id: string; name: string }[] | undefined): Record<s
 
 export function SchedulePage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const schoolId = user?.school_id
   const isAdmin = user?.role === 'ADMIN'
 
@@ -39,6 +46,7 @@ export function SchedulePage() {
 
   const { data: version } = useScheduleVersion(schoolId, effectiveVersionId ?? undefined)
   const { data: assignments } = useScheduleAssignments(schoolId, effectiveVersionId ?? undefined)
+  const { data: violations } = useScheduleViolations(schoolId, effectiveVersionId ?? undefined)
 
   const [viewBy, setViewBy] = useState<TimetableView>(isAdmin ? 'class' : 'teacher')
   const [viewId, setViewId] = useState<string>(isAdmin ? '' : (user?.teacher_id ?? ''))
@@ -49,10 +57,16 @@ export function SchedulePage() {
   const roomNames = useMemo(() => nameMap(rooms), [rooms])
 
   const viewOptions = viewBy === 'class' ? classes : viewBy === 'teacher' ? teachers : rooms
+  const viewByLabel =
+    viewBy === 'class'
+      ? t('schedule.class')
+      : viewBy === 'teacher'
+        ? t('schedule.teacher')
+        : t('schedule.room')
 
   return (
     <main>
-      <h2>Schedule</h2>
+      <h2>{t('schedule.title')}</h2>
 
       {isAdmin && schoolId && (
         <>
@@ -80,36 +94,63 @@ export function SchedulePage() {
       {!isAdmin && (
         <p>
           {schedule?.active_version_id
-            ? 'Showing the currently published schedule.'
-            : 'No schedule has been published yet.'}
+            ? t('schedule.publishedNotice')
+            : t('schedule.noPublishedNotice')}
         </p>
       )}
 
       <section>
-        <h3>Timetable</h3>
-        <label htmlFor="timetable-view-by">View by</label>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3>{t('schedule.timetable')}</h3>
+          {days && periods && version && assignments && viewId && (
+            <button
+              type="button"
+              className="btn btn-secondary no-print"
+              onClick={() => window.print()}
+            >
+              🖨 {t('schedule.print')}
+            </button>
+          )}
+        </div>
+        <label htmlFor="timetable-view-by" className="no-print">
+          {t('schedule.viewBy')}
+        </label>
         <select
           id="timetable-view-by"
+          className="no-print"
           value={viewBy}
           onChange={(e) => {
             setViewBy(e.target.value as TimetableView)
             setViewId('')
           }}
         >
-          <option value="class">Class</option>
-          <option value="teacher">Teacher</option>
-          <option value="room">Room</option>
+          <option value="class">{t('schedule.class')}</option>
+          <option value="teacher">{t('schedule.teacher')}</option>
+          <option value="room">{t('schedule.room')}</option>
         </select>
 
-        <label htmlFor="timetable-view-id">{viewBy}</label>
-        <select id="timetable-view-id" value={viewId} onChange={(e) => setViewId(e.target.value)}>
-          <option value="">Select…</option>
+        <label htmlFor="timetable-view-id" className="no-print">
+          {viewByLabel}
+        </label>
+        <select
+          id="timetable-view-id"
+          className="no-print"
+          value={viewId}
+          onChange={(e) => setViewId(e.target.value)}
+        >
+          <option value="">{t('schedule.select')}</option>
           {viewOptions?.map((entity) => (
             <option key={entity.id} value={entity.id}>
               {entity.name}
             </option>
           ))}
         </select>
+
+        {days && periods && version && assignments && viewId && (
+          <p className="print-only" style={{ display: 'none' }}>
+            {viewByLabel}: {viewOptions?.find((o) => o.id === viewId)?.name}
+          </p>
+        )}
 
         {days && periods && version && assignments && viewId ? (
           <TimetableGrid
@@ -121,17 +162,27 @@ export function SchedulePage() {
             teacherNames={teacherNames}
             classNames={classNames}
             roomNames={roomNames}
+            violations={violations}
             onSelectAssignment={
               isAdmin && version.status === 'DRAFT' ? (a) => setMovingAssignment(a) : undefined
+            }
+            dragToMove={
+              isAdmin && version.status === 'DRAFT' && schoolId
+                ? {
+                    schoolId,
+                    versionId: version.id,
+                    expectedVersionTag: version.version_tag,
+                  }
+                : undefined
             }
           />
         ) : (
           <p>
             {effectiveVersionId
-              ? 'Select what to view.'
+              ? t('schedule.selectWhatToView')
               : isAdmin
-                ? 'Generate or select a version above.'
-                : 'Nothing to show yet.'}
+                ? t('schedule.generateOrSelect')
+                : t('schedule.nothingToShowYet')}
           </p>
         )}
       </section>

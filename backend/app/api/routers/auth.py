@@ -83,6 +83,26 @@ def get_me(user: User = Depends(get_current_user)) -> UserResponse:
     return user_to_response(user)
 
 
+@router.post("/security/revoke-sessions", response_model=MessageResponse)
+def revoke_sessions(
+    user: User = Depends(get_current_user),
+    identity_admin: IdentityAdminPort = Depends(get_identity_admin),
+    audit_repository: AuditRepository = Depends(get_audit_repository),
+) -> MessageResponse:
+    """Self-service "sign out everywhere": revokes every refresh token for
+    the caller's own account, including the one behind the request that
+    made this call — the frontend signs the current tab out locally right
+    after, so the user re-authenticates everywhere, on purpose."""
+    identity_admin.revoke_sessions(user.id)
+    _record_auth_event(
+        audit_repository,
+        actor=user,
+        operation=AuditOperation.USER_SESSIONS_REVOKED,
+        user_id=user.id,
+    )
+    return MessageResponse(message="Signed out of all sessions.")
+
+
 def _client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
