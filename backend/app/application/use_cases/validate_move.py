@@ -6,6 +6,7 @@ independently-drifting notion of "valid".
 """
 
 from dataclasses import dataclass
+from typing import Literal
 
 from app.application.repositories import (
     AvailabilityRepository,
@@ -21,10 +22,15 @@ from app.application.repositories import (
 from app.application.use_cases.common import evaluate_proposed_move, load_scheduling_problem
 from app.domain.constraints import ConstraintEvaluator, Violation
 
+#: The three verdicts a proposed move can get. A closed set rather than a
+#: bare `str` so it reaches the OpenAPI schema, and from there the
+#: frontend's TypeScript union, as an actual constraint.
+MoveVerdict = Literal["VALID", "WARNING", "INVALID"]
+
 
 @dataclass(frozen=True, slots=True)
 class MoveValidationResult:
-    result: str  # "VALID" | "WARNING" | "INVALID"
+    result: MoveVerdict
     message: str | None
     violation: Violation | None
 

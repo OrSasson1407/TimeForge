@@ -1,117 +1,38 @@
-/** Mirrors backend/app/api/schemas/catalog.py — the seven school-scoped
- * catalog entities sharing the generic list/get/upsert shape. */
-import type { RoomStatus, TimePeriodKind, Weekday } from './enums'
+/**
+ * The seven school-scoped catalog entities.
+ *
+ * These are ALIASES over `api.generated.ts`, which is generated from the
+ * backend's own OpenAPI schema — not hand-maintained copies of it. That is
+ * the point: rename a field or change a type in
+ * `backend/app/api/schemas/catalog.py`, regenerate, and every place in this
+ * app that used the old shape stops compiling. Previously the two sides
+ * were independent declarations that could silently drift until something
+ * broke at runtime.
+ *
+ * The short names are kept (`Teacher`, not `TeacherResponse`) so call sites
+ * read naturally and so this indirection can change without touching them.
+ */
+import type { components } from './api.generated'
 
-export interface Teacher {
-  id: string
-  school_id: string
-  name: string
-  email: string
-  subject_ids: string[]
-  max_weekly_load: number
-  max_consecutive: number
-}
+type Schemas = components['schemas']
 
-export interface TeacherUpsertRequest {
-  name: string
-  email: string
-  subject_ids: string[]
-  max_weekly_load: number
-  max_consecutive: number
-}
+export type Teacher = Schemas['TeacherResponse']
+export type TeacherUpsertRequest = Schemas['TeacherUpsertRequest']
 
-export interface Class {
-  id: string
-  school_id: string
-  name: string
-  grade: number
-  student_count: number
-  home_room_id: string | null
-}
+export type Class = Schemas['ClassResponse']
+export type ClassUpsertRequest = Schemas['ClassUpsertRequest']
 
-export interface ClassUpsertRequest {
-  name: string
-  grade: number
-  student_count: number
-  home_room_id: string | null
-}
+export type Subject = Schemas['SubjectResponse']
+export type SubjectUpsertRequest = Schemas['SubjectUpsertRequest']
 
-export interface Subject {
-  id: string
-  school_id: string
-  name: string
-  code: string
-  required_capability: string | null
-  max_daily_occurrences: number
-  min_spacing_days: number
-}
+export type Room = Schemas['RoomResponse']
+export type RoomUpsertRequest = Schemas['RoomUpsertRequest']
 
-export interface SubjectUpsertRequest {
-  name: string
-  code: string
-  required_capability: string | null
-  max_daily_occurrences: number
-  min_spacing_days: number
-}
+export type SchoolDay = Schemas['SchoolDayResponse']
+export type SchoolDayUpsertRequest = Schemas['SchoolDayUpsertRequest']
 
-export interface Room {
-  id: string
-  school_id: string
-  name: string
-  capacity: number
-  room_type: string
-  capabilities: string[]
-  status: RoomStatus
-}
+export type TimePeriod = Schemas['TimePeriodResponse']
+export type TimePeriodUpsertRequest = Schemas['TimePeriodUpsertRequest']
 
-export interface RoomUpsertRequest {
-  name: string
-  capacity: number
-  room_type: string
-  capabilities: string[]
-  status: RoomStatus
-}
-
-export interface SchoolDay {
-  id: string
-  school_id: string
-  weekday: Weekday
-  is_active: boolean
-}
-
-export interface SchoolDayUpsertRequest {
-  weekday: Weekday
-  is_active: boolean
-}
-
-export interface TimePeriod {
-  id: string
-  school_id: string
-  index: number
-  start_time: string
-  end_time: string
-  kind: TimePeriodKind
-}
-
-export interface TimePeriodUpsertRequest {
-  index: number
-  start_time: string
-  end_time: string
-  kind: TimePeriodKind
-}
-
-export interface LessonRequirement {
-  id: string
-  school_id: string
-  class_id: string
-  subject_id: string
-  weekly_periods: number
-  required_capability: string | null
-}
-
-export interface LessonRequirementUpsertRequest {
-  class_id: string
-  subject_id: string
-  weekly_periods: number
-  required_capability: string | null
-}
+export type LessonRequirement = Schemas['LessonRequirementResponse']
+export type LessonRequirementUpsertRequest = Schemas['LessonRequirementUpsertRequest']
