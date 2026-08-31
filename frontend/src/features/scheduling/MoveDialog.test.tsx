@@ -11,6 +11,13 @@ import type {
   ValidateMoveResponse,
 } from '../../types/schedule'
 
+// MoveDialog reaches scheduleApi -> apiClient -> firebaseAuth, and that
+// module calls getAuth() at import time, which throws
+// `auth/invalid-api-key` wherever VITE_FIREBASE_* is unset — as it is in
+// CI. Nothing in this file exercises Firebase, so the one module that needs
+// credentials is stubbed, matching App.test.tsx.
+vi.mock('../../services/firebaseAuth', () => ({ auth: { currentUser: null } }))
+
 const applyMutate = vi.fn()
 
 vi.mock('../../hooks/useSchedule', () => ({

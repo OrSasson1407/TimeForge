@@ -1,0 +1,24 @@
+# Normalize every text file to LF in the repository and on checkout.
+#
+# Without this, Git's core.autocrlf rewrites files with CRLF on Windows
+# checkouts while CI (Linux) sees LF. That splits local and CI results on
+# anything line-ending sensitive: `prettier --check` fails locally on files
+# that pass in CI, and the API contract drift check
+# (.github/workflows/ci.yml) can report a diff on a regenerated file whose
+# content is byte-identical. Pinning eol=lf makes both environments agree.
+* text=auto eol=lf
+
+# Generated from the backend's OpenAPI schema. Marked explicitly so the
+# drift check compares content, never line endings.
+frontend/src/types/api.generated.ts text eol=lf
+openapi.json text eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
