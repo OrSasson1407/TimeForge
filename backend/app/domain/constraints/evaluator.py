@@ -51,6 +51,24 @@ class ConstraintEvaluator:
             violations.extend(constraint.violations_in(state))
         return violations
 
+    def soft_penalty(self, state: ScheduleState) -> float:
+        """Just the weighted soft-constraint total, skipping the
+        hard-violation scan that `score()` also performs.
+
+        This exists for the annealing optimizer, which evaluates a candidate
+        thousands of times and reads only this number. Calling `score()`
+        there ran `violations_in` — a full O(assignments) sweep across every
+        hard constraint — a second time per iteration and then discarded the
+        result, which a profile showed to be the single largest cost in a
+        solve. Computed from the same `explain()` breakdown `score()` sums,
+        so the two can never disagree about the total.
+        """
+        return sum(
+            contribution.weighted_penalty
+            for constraint in self.soft_constraints
+            for contribution in constraint.explain(state)
+        )
+
     def score(self, state: ScheduleState) -> Score:
         """docs/04-DESIGN.md #13: hardViolations from a full violation
         scan (reusing `violations_in`, never a second implementation of

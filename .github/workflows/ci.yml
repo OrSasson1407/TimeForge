@@ -118,3 +118,50 @@ jobs:
       # a handset and are deliberately out of CI's scope; see mobile/README.
       - name: Tests
         run: npm test
+
+  contract:
+    name: API contract (backend schema == frontend types)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Re-export the OpenAPI schema
+        run: uv run python -m scripts.export_openapi
+        working-directory: backend
+
+      - name: Re-generate the TypeScript types
+        run: npm run codegen
+        working-directory: frontend
+
+      # The committed artifacts must match what the current backend
+      # produces. If this fails, someone changed an API schema without
+      # running `npm run codegen` — and the frontend's types are now a
+      # description of an API that no longer exists.
+      - name: Fail if the committed contract is stale
+        run: |
+          if ! git diff --exit-code -- openapi.json frontend/src/types/api.generated.ts; then
+            echo "::error::API contract is out of date. Run:"
+            echo "::error::  cd backend && uv run python -m scripts.export_openapi"
+            echo "::error::  cd frontend && npm run codegen"
+            exit 1
+          fi
