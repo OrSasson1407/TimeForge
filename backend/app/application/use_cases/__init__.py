@@ -19,6 +19,10 @@ from app.application.use_cases.generate_schedule import (
 from app.application.use_cases.list_violations import ListViolationsUseCase
 from app.application.use_cases.publish_schedule import PublishScheduleUseCase
 from app.application.use_cases.reschedule import RescheduleOutcome, RescheduleUseCase
+from app.application.use_cases.schedule_analytics import (
+    ScheduleAnalytics,
+    ScheduleAnalyticsUseCase,
+)
 from app.application.use_cases.validate_move import MoveValidationResult, ValidateMoveUseCase
 
 __all__ = [
@@ -33,5 +37,7 @@ __all__ = [
     "PublishScheduleUseCase",
     "RescheduleOutcome",
     "RescheduleUseCase",
+    "ScheduleAnalytics",
+    "ScheduleAnalyticsUseCase",
     "ValidateMoveUseCase",
 ]

@@ -30,6 +30,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       { label: t('nav.audit'), path: '/audit', adminOnly: true },
       { label: t('nav.pendingApprovals'), path: '/pending-approvals', adminOnly: true },
       { label: t('nav.manageUsers'), path: '/users', adminOnly: true },
+      { label: t('nav.analytics'), path: '/analytics', adminOnly: true },
       { label: t('nav.security'), path: '/security' },
     ],
     [t],

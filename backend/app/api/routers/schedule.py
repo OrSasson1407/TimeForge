@@ -19,6 +19,7 @@ from app.api.dependencies import (
     get_publish_schedule_use_case,
     get_reschedule_use_case,
     get_rescheduling_event_repository,
+    get_schedule_analytics_use_case,
     get_schedule_repository,
     get_schedule_version_repository,
     get_validate_move_use_case,
@@ -39,11 +40,13 @@ from app.api.schemas.schedule import (
     GenerateScheduleResponse,
     ProposedMove,
     PublishRequest,
+    ScheduleAnalyticsResponse,
     ScheduleAssignmentResponse,
     ScheduleResponse,
     ScheduleVersionResponse,
     ValidateMoveResponse,
     ViolationResponse,
+    analytics_to_response,
     assignment_to_response,
     infeasibility_to_response,
     schedule_to_response,
@@ -63,10 +66,12 @@ from app.application.use_cases import (
     ListViolationsUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
+    ScheduleAnalyticsUseCase,
     ValidateMoveUseCase,
 )
 from app.core.errors import NotFoundError
 from app.domain.models import User
+from app.infrastructure.realtime import broadcaster, topic_for_version
 
 router = APIRouter(prefix="/schedules", tags=["schedules"])
 
@@ -133,6 +138,18 @@ def list_schedule_assignments(
     repository: ScheduleVersionRepository = Depends(get_schedule_version_repository),
 ) -> list[ScheduleAssignmentResponse]:
     return [assignment_to_response(a) for a in repository.list_assignments(school_id, version_id)]
+
+
+@router.get("/versions/{version_id}/analytics", response_model=ScheduleAnalyticsResponse)
+def get_schedule_analytics(
+    version_id: str,
+    school_id: str = Query(...),
+    _user: User = Depends(require_admin),
+    use_case: ScheduleAnalyticsUseCase = Depends(get_schedule_analytics_use_case),
+) -> ScheduleAnalyticsResponse:
+    """Admin-only: workload/utilization reporting is management information
+    about staff, not something a teacher needs about their colleagues."""
+    return analytics_to_response(use_case.execute(school_id, school_id, version_id))
 
 
 @router.get("/versions/{version_id}/violations", response_model=list[ViolationResponse])
@@ -208,6 +225,14 @@ def apply_move(
         expected_version_tag=body.expected_version_tag,
         actor=user,
     )
+    # Fire-and-forget, and only *after* the write has succeeded: colleagues
+    # are told to refetch, never told what changed. The authoritative data
+    # still comes from the REST endpoints, so a missed notification costs
+    # freshness rather than correctness (see realtime/manager.py).
+    broadcaster.publish_threadsafe(
+        topic_for_version(school_id, version_id),
+        {"type": "schedule-changed", "change": "assignment-moved", "actor": user.display_name},
+    )
     return assignment_to_response(updated)
 
 
@@ -221,6 +246,10 @@ def publish_schedule_version(
 ) -> ScheduleVersionResponse:
     published = use_case.execute(
         school_id, version_id, expected_version_tag=body.expected_version_tag, actor=user
+    )
+    broadcaster.publish_threadsafe(
+        topic_for_version(school_id, version_id),
+        {"type": "schedule-changed", "change": "published", "actor": user.display_name},
     )
     return version_to_response(published)
 

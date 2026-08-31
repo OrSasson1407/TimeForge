@@ -26,6 +26,7 @@ import { AvailabilityPage } from '../pages/AvailabilityPage'
 import { ConstraintsPage } from '../pages/ConstraintsPage'
 import { SchedulePage } from '../pages/SchedulePage'
 import { AuditPage } from '../pages/AuditPage'
+import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { SecurityPage } from '../pages/SecurityPage'
 
 function AppShell() {
@@ -71,6 +72,7 @@ function AppShell() {
               <Route path="/management" element={<ManagementPage />} />
               <Route path="/constraints" element={<ConstraintsPage />} />
               <Route path="/audit" element={<AuditPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/pending-approvals" element={<AdminPendingApprovalsPage />} />
               <Route path="/users" element={<AdminUsersPage />} />
             </Route>

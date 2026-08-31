@@ -24,6 +24,7 @@ export function AppHeader() {
               <NavLink to="/management">{t('nav.management')}</NavLink>
               <NavLink to="/constraints">{t('nav.constraints')}</NavLink>
               <NavLink to="/audit">{t('nav.audit')}</NavLink>
+              <NavLink to="/analytics">{t('nav.analytics')}</NavLink>
               <NavLink to="/pending-approvals">{t('nav.pendingApprovals')}</NavLink>
               <NavLink to="/users">{t('nav.manageUsers')}</NavLink>
             </>

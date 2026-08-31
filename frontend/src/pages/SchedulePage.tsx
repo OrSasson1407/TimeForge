@@ -14,6 +14,7 @@ import {
   useScheduleVersion,
   useScheduleViolations,
 } from '../hooks/useSchedule'
+import { useCollaboration } from '../hooks/useCollaboration'
 import { GeneratePanel } from '../features/scheduling/GeneratePanel'
 import { VersionPicker } from '../features/scheduling/VersionPicker'
 import { CompareView } from '../features/scheduling/CompareView'
@@ -47,6 +48,14 @@ export function SchedulePage() {
   const { data: version } = useScheduleVersion(schoolId, effectiveVersionId ?? undefined)
   const { data: assignments } = useScheduleAssignments(schoolId, effectiveVersionId ?? undefined)
   const { data: violations } = useScheduleViolations(schoolId, effectiveVersionId ?? undefined)
+  // Admin-only: a teacher reading the published timetable has no colleague
+  // to coordinate with, so there is nothing to be aware of and no reason to
+  // hold a socket open.
+  const collaboration = useCollaboration(
+    isAdmin ? schoolId : undefined,
+    isAdmin ? (effectiveVersionId ?? undefined) : undefined,
+  )
+  const otherParticipants = collaboration.participants.filter((p) => p.user_id !== user?.id)
 
   const [viewBy, setViewBy] = useState<TimetableView>(isAdmin ? 'class' : 'teacher')
   const [viewId, setViewId] = useState<string>(isAdmin ? '' : (user?.teacher_id ?? ''))
@@ -96,6 +105,13 @@ export function SchedulePage() {
           {schedule?.active_version_id
             ? t('schedule.publishedNotice')
             : t('schedule.noPublishedNotice')}
+        </p>
+      )}
+
+      {isAdmin && effectiveVersionId && otherParticipants.length > 0 && (
+        <p className="collab-presence no-print" role="status">
+          <span aria-hidden="true">●</span> {t('collab.alsoViewing')}{' '}
+          {otherParticipants.map((p) => p.display_name).join(', ')}
         </p>
       )}
 

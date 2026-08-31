@@ -251,3 +251,48 @@ def test_violations_endpoint_reflects_the_persisted_state(api: ApiFixtures) -> N
     involved = {entity for v in violations for entity in v["involved_entities"]}
     assert target.lesson_id in involved
     assert other.lesson_id in involved
+
+
+def test_analytics_reports_workload_utilization_and_coverage(api: ApiFixtures) -> None:
+    """The seeded school is deliberately tight: one teacher, one room, and
+    four lesson slots (2 days x 2 periods) for a 2-period requirement — so
+    every figure below is independently predictable rather than whatever
+    the solver happened to produce."""
+    _seed_minimal_solvable_school(api)
+    api.admin()
+
+    generate_response = api.client.post(
+        "/schedules/generate?school_id=s1", json={"request_id": "req-1"}
+    )
+    version_id = generate_response.json()["version"]["id"]
+
+    response = api.client.get(f"/schedules/versions/{version_id}/analytics?school_id=s1")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total_assignments"] == 2
+    assert body["lesson_slots_per_week"] == 4  # 2 active days x 2 LESSON periods
+
+    # A single teacher carries both lessons, so the spread is trivially 0.
+    workloads = {w["teacher_id"]: w for w in body["teacher_workloads"]}
+    assert workloads["t1"]["assigned_periods"] == 2
+    assert body["workload_spread"] == 0.0
+
+    utilizations = {u["room_id"]: u for u in body["room_utilizations"]}
+    assert utilizations["r1"]["used_slots"] == 2
+    assert utilizations["r1"]["available_slots"] == 4
+    assert utilizations["r1"]["utilization_ratio"] == 0.5
+
+    coverages = {c["class_id"]: c for c in body["class_coverages"]}
+    assert coverages["c1"]["scheduled_periods"] == 2
+    assert coverages["c1"]["required_periods"] == 2
+    assert coverages["c1"]["is_complete"] is True
+
+
+def test_analytics_is_admin_only(api: ApiFixtures) -> None:
+    _seed_minimal_solvable_school(api)
+    api.teacher()
+
+    response = api.client.get("/schedules/versions/whatever/analytics?school_id=s1")
+
+    assert response.status_code == 403

@@ -61,6 +61,9 @@ export interface InfeasibilityReport {
 export interface SearchStats {
   candidates_tried: number
   backtracks: number
+  /** Decision frames skipped by conflict-directed backjumping — see the
+   * backend's `scheduling/conflicts.py`. */
+  backjumps: number
   duration_seconds: number
 }
 
@@ -99,6 +102,44 @@ export interface ApplyMoveRequest extends ProposedMove {
 
 export interface PublishRequest {
   expected_version_tag: number
+}
+
+export interface TeacherWorkload {
+  teacher_id: string
+  teacher_name: string
+  assigned_periods: number
+  max_weekly_load: number
+  /** assigned_periods / max_weekly_load, 0 when the max is unset. */
+  load_ratio: number
+}
+
+export interface RoomUtilization {
+  room_id: string
+  room_name: string
+  used_slots: number
+  /** 0 for a CLOSED room — it offers no slots at all, which is different
+   * from an open room nobody booked. */
+  available_slots: number
+  utilization_ratio: number
+}
+
+export interface ClassCoverage {
+  class_id: string
+  class_name: string
+  scheduled_periods: number
+  required_periods: number
+  is_complete: boolean
+}
+
+export interface ScheduleAnalytics {
+  total_assignments: number
+  lesson_slots_per_week: number
+  /** Population standard deviation of periods across teachers — 0 is a
+   * perfectly even split. */
+  workload_spread: number
+  teacher_workloads: TeacherWorkload[]
+  room_utilizations: RoomUtilization[]
+  class_coverages: ClassCoverage[]
 }
 
 export interface AssignmentDiffEntry {

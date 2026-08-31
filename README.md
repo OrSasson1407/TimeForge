@@ -134,6 +134,22 @@ npx playwright install chromium
 npm run test
 ```
 
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull
+request: backend (`ruff check`, `ruff format --check`, `pyright`, `pytest`)
+and frontend (`tsc`, `eslint`, `prettier --check`, `vitest`, and a real
+production `vite build`) as two parallel jobs.
+
+`.github/workflows/deploy.yml` deploys the frontend and the Firestore
+rules/indexes — staging on every push to `main`, production only on a
+published GitHub Release. Both are gated on a GitHub Environment; the
+secrets and variables each one needs are listed at the top of that file.
+The FastAPI backend is deliberately not deployed there yet: it needs a
+hosting target chosen first (Cloud Run is the natural fit alongside
+Firebase), and the workflow does not pretend to deploy something it
+doesn't.
+
 ## Deploying to Production
 
 The codebase has no hardcoded demo/mock data or default credentials —
@@ -168,6 +184,34 @@ everything below is configuration, not code changes. Before going live:
   `scripts/seed.py` demo-data script, which no longer exists.
 
 ## Project Status
+
+**Solver performance.** The search now forward-checks incrementally: because
+`resolve_placement` reads state only at the slot being tested, placing a
+lesson at slot S provably cannot change any other slot's availability, so
+only S needs re-testing. That is an exact equivalence, not an approximation
+(asserted in `test_incremental_forward_check_matches_a_full_rescan`), and it
+replaced ~46,000 `resolve_placement` calls per search node with at most one
+per remaining lesson. Measured on the benchmark scenarios
+(`uv run python -m scripts.benchmark_scheduling`):
+
+| Scenario | Lessons | Before | After |
+|---|---|---|---|
+| Small | 115 | 0.5s VALID | **0.24s** VALID |
+| Medium | 460 | 35.9s VALID | **3.5s** VALID |
+| Large | 1150 | 180s **TIMEOUT** | **23.3s** VALID |
+
+The slow integration suite dropped from 379s to 31s alongside it. The search
+also does conflict-directed backjumping now
+(`app/domain/scheduling/conflicts.py`) — worth noting honestly that the
+benchmark scenarios are provisioned generously enough to solve with *zero*
+backtracking, so that part is insurance for tighter real-world instances
+rather than the source of the numbers above; the `backjumps` counter in
+`SearchStats` is what shows whether it is engaging.
+
+**Also added:** an Analytics dashboard (teacher workload balance, room
+utilization, curriculum coverage), live collaboration over WebSockets
+(presence plus auto-refetch when a colleague edits the same version), and
+the CI/CD pipeline described above.
 
 Complete through Phase 10 (Quality) — all ten phases of the implementation phase order in [docs/01-CLAUDE.md](docs/01-CLAUDE.md) §"Agent Workflow" (Domain → Constraints → Scheduling Engine → Optimization → Firebase → API → Frontend → Rescheduling → Quality):
 

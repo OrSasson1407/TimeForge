@@ -7,6 +7,7 @@ import type {
   ProposedMove,
   PublishRequest,
   Schedule,
+  ScheduleAnalytics,
   ScheduleAssignment,
   ScheduleVersion,
   ValidateMoveResponse,
@@ -28,6 +29,11 @@ export const scheduleApi = {
   listAssignments: (schoolId: string, versionId: string) =>
     apiClient.get<ScheduleAssignment[]>(
       `/schedules/versions/${versionId}/assignments?school_id=${schoolId}`,
+    ),
+
+  analytics: (schoolId: string, versionId: string) =>
+    apiClient.get<ScheduleAnalytics>(
+      `/schedules/versions/${versionId}/analytics?school_id=${schoolId}`,
     ),
 
   listViolations: (schoolId: string, versionId: string) =>

@@ -36,6 +36,7 @@ from app.application.use_cases import (
     ListViolationsUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
+    ScheduleAnalyticsUseCase,
     ValidateMoveUseCase,
 )
 from app.core.config import get_settings
@@ -264,6 +265,30 @@ def get_validate_move_use_case(
         school_day_repository=school_day_repository,
         time_period_repository=time_period_repository,
         scheduling_config_repository=scheduling_config_repository,
+    )
+
+
+def get_schedule_analytics_use_case(
+    schedule_version_repository: ScheduleVersionRepository = Depends(
+        get_schedule_version_repository
+    ),
+    teacher_repository: TeacherRepository = Depends(get_teacher_repository),
+    class_repository: ClassRepository = Depends(get_class_repository),
+    room_repository: RoomRepository = Depends(get_room_repository),
+    requirement_repository: LessonRequirementRepository = Depends(
+        get_lesson_requirement_repository
+    ),
+    school_day_repository: SchoolDayRepository = Depends(get_school_day_repository),
+    time_period_repository: TimePeriodRepository = Depends(get_time_period_repository),
+) -> ScheduleAnalyticsUseCase:
+    return ScheduleAnalyticsUseCase(
+        schedule_version_repository=schedule_version_repository,
+        teacher_repository=teacher_repository,
+        class_repository=class_repository,
+        room_repository=room_repository,
+        requirement_repository=requirement_repository,
+        school_day_repository=school_day_repository,
+        time_period_repository=time_period_repository,
     )
 
 

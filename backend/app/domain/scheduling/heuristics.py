@@ -18,6 +18,7 @@ been updated to describe this.
 
 from collections import Counter
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 from app.domain.models.lesson import Lesson
 from app.domain.models.value_objects import TimeSlot
@@ -71,19 +72,70 @@ def least_constraining_value_order(
     return tuple(sorted(domain, key=lambda slot: slot_counts[slot]))
 
 
-def forward_check(
-    state: ScheduleState, remaining: Sequence[LessonDomain], problem: SchedulingProblem
-) -> tuple[LessonDomain, ...] | None:
+@dataclass(frozen=True, slots=True)
+class ForwardCheckResult:
+    """Either a fully pruned set of domains (`pruned`), or a wipe-out —
+    `wiped_out` names the lesson that ran out of slots and `wiped_domain`
+    is what it still had *before* this state was applied. Conflict-directed
+    backjumping needs that pair to work out whose reconsideration could
+    give the lesson its domain back (see `conflicts.domain_wipeout_culprits`);
+    plain forward checking only needs to know that the branch is dead."""
+
+    pruned: tuple[LessonDomain, ...] | None
+    wiped_out: Lesson | None = None
+    wiped_domain: tuple[TimeSlot, ...] = ()
+
+
+def forward_check_detailed(
+    state: ScheduleState,
+    remaining: Sequence[LessonDomain],
+    problem: SchedulingProblem,
+    changed_slot: TimeSlot | None = None,
+) -> ForwardCheckResult:
     """Prune every remaining lesson's slot domain against the new `state`:
     a slot survives only if `resolve_placement` can still find a free
     (teacher, room) pair for it. If any lesson's domain becomes empty, this
-    branch is dead (docs/04-DESIGN.md #16)."""
+    branch is dead (docs/04-DESIGN.md #16).
+
+    `changed_slot` makes this INCREMENTAL, which is what makes the search
+    tractable at scale. `SchedulingProblem.resolve_placement` reads `state`
+    only through `class_assignment_at` / `teacher_assignment_at` /
+    `room_assignment_at`, and every one of those is queried *at the slot
+    being tested* — so adding an assignment at slot S cannot change the
+    answer for any slot other than S. Re-testing only S is therefore exactly
+    equivalent to a full re-scan, not an approximation of one.
+
+    The difference is not marginal: on the "Large" benchmark scenario
+    (1150 lessons x ~40 slots) a full re-scan costs ~46,000
+    `resolve_placement` calls per search node, versus at most one per
+    remaining lesson here. Pass `changed_slot=None` for the initial check,
+    where no single slot changed and everything genuinely must be examined.
+    """
     pruned: list[LessonDomain] = []
     for lesson, domain in remaining:
-        new_domain = tuple(
-            slot for slot in domain if problem.resolve_placement(lesson, slot, state) is not None
-        )
+        if changed_slot is None:
+            new_domain = tuple(
+                slot
+                for slot in domain
+                if problem.resolve_placement(lesson, slot, state) is not None
+            )
+        elif changed_slot in domain:
+            if problem.resolve_placement(lesson, changed_slot, state) is None:
+                new_domain = tuple(slot for slot in domain if slot != changed_slot)
+            else:
+                new_domain = tuple(domain)
+        else:
+            new_domain = tuple(domain)
+
         if not new_domain:
-            return None
+            return ForwardCheckResult(pruned=None, wiped_out=lesson, wiped_domain=tuple(domain))
         pruned.append((lesson, new_domain))
-    return tuple(pruned)
+    return ForwardCheckResult(pruned=tuple(pruned))
+
+
+def forward_check(
+    state: ScheduleState, remaining: Sequence[LessonDomain], problem: SchedulingProblem
+) -> tuple[LessonDomain, ...] | None:
+    """The plain "did this branch survive?" form of `forward_check_detailed`,
+    for callers that don't need to attribute a wipe-out."""
+    return forward_check_detailed(state, remaining, problem).pruned
