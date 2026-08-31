@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from app.application.use_cases.my_timetable import MyTimetable
 from app.application.use_cases.schedule_analytics import ScheduleAnalytics
+from app.application.use_cases.validate_move import MoveVerdict
 from app.domain.constraints.violation import Severity
 from app.domain.models import (
     Schedule,
@@ -192,7 +193,7 @@ class ViolationResponse(BaseModel):
 
 
 class ValidateMoveResponse(BaseModel):
-    result: str  # "VALID" | "WARNING" | "INVALID"
+    result: MoveVerdict
     message: str | None = None
     violation: ViolationResponse | None = None
 

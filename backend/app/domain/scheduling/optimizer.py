@@ -120,7 +120,7 @@ class SimulatedAnnealingOptimizer:
 
         rng = random.Random(problem.config.random_seed)  # noqa: S311 -- seeded for NFR-007 determinism, not crypto
         current = state
-        current_penalty = evaluator.score(current).soft_penalty
+        current_penalty = evaluator.soft_penalty(current)
         temperature = problem.config.initial_temperature
 
         while temperature > problem.config.min_temperature and time.monotonic() < deadline:
@@ -133,7 +133,7 @@ class SimulatedAnnealingOptimizer:
                 temperature *= problem.config.cooling_rate
                 continue
 
-            candidate_penalty = evaluator.score(candidate_state).soft_penalty
+            candidate_penalty = evaluator.soft_penalty(candidate_state)
             delta = candidate_penalty - current_penalty
             if delta < 0 or rng.random() < math.exp(-delta / temperature):
                 current, current_penalty = candidate_state, candidate_penalty

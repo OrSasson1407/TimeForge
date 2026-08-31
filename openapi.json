@@ -1,0 +1,6290 @@
+{
+  "components": {
+    "schemas": {
+      "ActorResponse": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "role"
+        ],
+        "title": "ActorResponse",
+        "type": "object"
+      },
+      "AdminUserResponse": {
+        "description": "The admin-facing \"all users\" list (docs/02-PRD.md #28a) \u2014 unlike\nUserResponse (which is what a user gets back about themselves), this\nincludes the email address, the way PendingUserResponse already does.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Id"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "school_id",
+          "display_name",
+          "is_active",
+          "created_at"
+        ],
+        "title": "AdminUserResponse",
+        "type": "object"
+      },
+      "ApplyMoveRequest": {
+        "properties": {
+          "assignment_id": {
+            "minLength": 1,
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "day_id": {
+            "minLength": 1,
+            "title": "Day Id",
+            "type": "string"
+          },
+          "expected_version_tag": {
+            "title": "Expected Version Tag",
+            "type": "integer"
+          },
+          "room_id": {
+            "minLength": 1,
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "minLength": 1,
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "minLength": 1,
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "teacher_id",
+          "room_id",
+          "day_id",
+          "time_period_id",
+          "expected_version_tag"
+        ],
+        "title": "ApplyMoveRequest",
+        "type": "object"
+      },
+      "ApproveUserRequest": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "teacher_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Id"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "ApproveUserRequest",
+        "type": "object"
+      },
+      "AssignmentDiffEntry": {
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScheduleAssignmentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "before": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScheduleAssignmentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lesson_id": {
+            "title": "Lesson Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lesson_id"
+        ],
+        "title": "AssignmentDiffEntry",
+        "type": "object"
+      },
+      "AuditEntityType": {
+        "enum": [
+          "SCHOOL",
+          "TEACHER",
+          "CLASS",
+          "SUBJECT",
+          "ROOM",
+          "LESSON_REQUIREMENT",
+          "AVAILABILITY",
+          "SCHEDULE",
+          "SCHEDULE_VERSION",
+          "SCHEDULE_ASSIGNMENT",
+          "SCHEDULING_CONFIG",
+          "USER"
+        ],
+        "title": "AuditEntityType",
+        "type": "string"
+      },
+      "AuditEventResponse": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/ActorResponse"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "$ref": "#/components/schemas/AuditEntityType"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/AuditOperation"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "title": "Timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "actor",
+          "timestamp",
+          "operation",
+          "entity_type",
+          "entity_id"
+        ],
+        "title": "AuditEventResponse",
+        "type": "object"
+      },
+      "AuditOperation": {
+        "description": "docs/04-DESIGN.md #22; master prompt Audit Log examples.",
+        "enum": [
+          "SCHEDULE_GENERATED",
+          "SCHEDULE_PUBLISHED",
+          "ASSIGNMENT_MOVED",
+          "RESCHEDULED",
+          "AVAILABILITY_CHANGED",
+          "ROOM_STATUS_CHANGED",
+          "CONSTRAINT_CONFIG_CHANGED",
+          "ENTITY_CONFIGURED",
+          "USER_REGISTERED",
+          "USER_EMAIL_VERIFIED",
+          "USER_APPROVED",
+          "USER_REJECTED",
+          "USER_SUSPENDED",
+          "USER_REACTIVATED",
+          "USER_SESSIONS_REVOKED"
+        ],
+        "title": "AuditOperation",
+        "type": "string"
+      },
+      "AvailabilityResponse": {
+        "properties": {
+          "day_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_available": {
+            "title": "Is Available",
+            "type": "boolean"
+          },
+          "owner_id": {
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "owner_type": {
+            "$ref": "#/components/schemas/OwnerType"
+          },
+          "preference_weight": {
+            "title": "Preference Weight",
+            "type": "number"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "owner_type",
+          "owner_id",
+          "time_period_id",
+          "is_available",
+          "preference_weight"
+        ],
+        "title": "AvailabilityResponse",
+        "type": "object"
+      },
+      "AvailabilityUpsertRequest": {
+        "properties": {
+          "day_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Id"
+          },
+          "is_available": {
+            "default": true,
+            "title": "Is Available",
+            "type": "boolean"
+          },
+          "owner_id": {
+            "minLength": 1,
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "owner_type": {
+            "$ref": "#/components/schemas/OwnerType"
+          },
+          "preference_weight": {
+            "default": 0.0,
+            "title": "Preference Weight",
+            "type": "number"
+          },
+          "time_period_id": {
+            "minLength": 1,
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner_type",
+          "owner_id",
+          "time_period_id"
+        ],
+        "title": "AvailabilityUpsertRequest",
+        "type": "object"
+      },
+      "BottleneckResponse": {
+        "properties": {
+          "affected_class_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Class Ids",
+            "type": "array"
+          },
+          "affected_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Teacher Ids",
+            "type": "array"
+          },
+          "available": {
+            "title": "Available",
+            "type": "integer"
+          },
+          "required": {
+            "title": "Required",
+            "type": "integer"
+          },
+          "required_capability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Capability"
+          },
+          "shortage": {
+            "title": "Shortage",
+            "type": "integer"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_id",
+          "required_capability",
+          "required",
+          "available",
+          "shortage",
+          "affected_class_ids",
+          "affected_teacher_ids"
+        ],
+        "title": "BottleneckResponse",
+        "type": "object"
+      },
+      "ClassCoverageResponse": {
+        "properties": {
+          "class_id": {
+            "title": "Class Id",
+            "type": "string"
+          },
+          "class_name": {
+            "title": "Class Name",
+            "type": "string"
+          },
+          "is_complete": {
+            "title": "Is Complete",
+            "type": "boolean"
+          },
+          "required_periods": {
+            "title": "Required Periods",
+            "type": "integer"
+          },
+          "scheduled_periods": {
+            "title": "Scheduled Periods",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "class_id",
+          "class_name",
+          "scheduled_periods",
+          "required_periods",
+          "is_complete"
+        ],
+        "title": "ClassCoverageResponse",
+        "type": "object"
+      },
+      "ClassResponse": {
+        "properties": {
+          "grade": {
+            "title": "Grade",
+            "type": "integer"
+          },
+          "home_room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Room Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "student_count": {
+            "title": "Student Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "name",
+          "grade",
+          "student_count"
+        ],
+        "title": "ClassResponse",
+        "type": "object"
+      },
+      "ClassUpsertRequest": {
+        "properties": {
+          "grade": {
+            "minimum": 0.0,
+            "title": "Grade",
+            "type": "integer"
+          },
+          "home_room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Room Id"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "student_count": {
+            "exclusiveMinimum": 0.0,
+            "title": "Student Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "grade",
+          "student_count"
+        ],
+        "title": "ClassUpsertRequest",
+        "type": "object"
+      },
+      "CompareVersionsResponse": {
+        "properties": {
+          "added": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentDiffEntry"
+            },
+            "title": "Added",
+            "type": "array"
+          },
+          "from_version_id": {
+            "title": "From Version Id",
+            "type": "string"
+          },
+          "moved": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentDiffEntry"
+            },
+            "title": "Moved",
+            "type": "array"
+          },
+          "removed": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentDiffEntry"
+            },
+            "title": "Removed",
+            "type": "array"
+          },
+          "to_version_id": {
+            "title": "To Version Id",
+            "type": "string"
+          },
+          "unchanged_count": {
+            "title": "Unchanged Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from_version_id",
+          "to_version_id",
+          "added",
+          "removed",
+          "moved",
+          "unchanged_count"
+        ],
+        "title": "CompareVersionsResponse",
+        "type": "object"
+      },
+      "CompleteOAuthProfileRequest": {
+        "description": "Google (or any future OAuth provider) sign-in already gives Firebase\na verified identity and a verified email \u2014 this just fills in the\nTimeForge-specific fields a fresh Firebase Auth account doesn't carry\n(docs/02-PRD.md #28a): which school, and a display name (pre-filled\nfrom the provider profile by the frontend, editable).",
+        "properties": {
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "school_id": {
+            "minLength": 1,
+            "title": "School Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name",
+          "school_id"
+        ],
+        "title": "CompleteOAuthProfileRequest",
+        "type": "object"
+      },
+      "DevicePlatform": {
+        "enum": [
+          "IOS",
+          "ANDROID"
+        ],
+        "title": "DevicePlatform",
+        "type": "string"
+      },
+      "DisruptionCostResponse": {
+        "properties": {
+          "changed_rooms": {
+            "title": "Changed Rooms",
+            "type": "integer"
+          },
+          "changed_teachers": {
+            "title": "Changed Teachers",
+            "type": "integer"
+          },
+          "moved_assignments": {
+            "title": "Moved Assignments",
+            "type": "integer"
+          },
+          "soft_constraint_penalty_delta": {
+            "title": "Soft Constraint Penalty Delta",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "number"
+          }
+        },
+        "required": [
+          "moved_assignments",
+          "changed_rooms",
+          "changed_teachers",
+          "soft_constraint_penalty_delta",
+          "total"
+        ],
+        "title": "DisruptionCostResponse",
+        "type": "object"
+      },
+      "GenerateScheduleRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "request_id": {
+            "description": "Idempotency key (docs/04-DESIGN.md #Idempotency)",
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id"
+        ],
+        "title": "GenerateScheduleRequest",
+        "type": "object"
+      },
+      "GenerateScheduleResponse": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "infeasibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InfeasibilityResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stats": {
+            "$ref": "#/components/schemas/SearchStatsResponse"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SolverStatus"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScheduleVersionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "stats"
+        ],
+        "title": "GenerateScheduleResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "InfeasibilityResponse": {
+        "properties": {
+          "bottlenecks": {
+            "items": {
+              "$ref": "#/components/schemas/BottleneckResponse"
+            },
+            "title": "Bottlenecks",
+            "type": "array"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "bottlenecks"
+        ],
+        "title": "InfeasibilityResponse",
+        "type": "object"
+      },
+      "LessonRequirementResponse": {
+        "properties": {
+          "class_id": {
+            "title": "Class Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "required_capability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Capability"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "weekly_periods": {
+            "title": "Weekly Periods",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "class_id",
+          "subject_id",
+          "weekly_periods"
+        ],
+        "title": "LessonRequirementResponse",
+        "type": "object"
+      },
+      "LessonRequirementUpsertRequest": {
+        "properties": {
+          "class_id": {
+            "minLength": 1,
+            "title": "Class Id",
+            "type": "string"
+          },
+          "required_capability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Capability"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "weekly_periods": {
+            "exclusiveMinimum": 0.0,
+            "title": "Weekly Periods",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "class_id",
+          "subject_id",
+          "weekly_periods"
+        ],
+        "title": "LessonRequirementUpsertRequest",
+        "type": "object"
+      },
+      "MessageResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "MessageResponse",
+        "type": "object"
+      },
+      "MyTimetableResponse": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/TimetableEntryResponse"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "title": "MyTimetableResponse",
+        "type": "object"
+      },
+      "OwnerType": {
+        "description": "Who an Availability record belongs to.",
+        "enum": [
+          "TEACHER",
+          "CLASS"
+        ],
+        "title": "OwnerType",
+        "type": "string"
+      },
+      "PendingUserResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "school_id",
+          "created_at"
+        ],
+        "title": "PendingUserResponse",
+        "type": "object"
+      },
+      "ProposedMove": {
+        "properties": {
+          "assignment_id": {
+            "minLength": 1,
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "day_id": {
+            "minLength": 1,
+            "title": "Day Id",
+            "type": "string"
+          },
+          "room_id": {
+            "minLength": 1,
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "minLength": 1,
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "minLength": 1,
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "teacher_id",
+          "room_id",
+          "day_id",
+          "time_period_id"
+        ],
+        "title": "ProposedMove",
+        "type": "object"
+      },
+      "PublicSchoolResponse": {
+        "description": "Deliberately thinner than SchoolResponse (no timezone) \u2014 this is the\none school-related shape exposed to an unauthenticated caller, for the\nschool picker on the registration page.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "PublicSchoolResponse",
+        "type": "object"
+      },
+      "PublishRequest": {
+        "properties": {
+          "expected_version_tag": {
+            "title": "Expected Version Tag",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version_tag"
+        ],
+        "title": "PublishRequest",
+        "type": "object"
+      },
+      "RegisterDeviceRequest": {
+        "properties": {
+          "platform": {
+            "$ref": "#/components/schemas/DevicePlatform"
+          },
+          "token": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "platform"
+        ],
+        "title": "RegisterDeviceRequest",
+        "type": "object"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "password": {
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          },
+          "recaptcha_token": {
+            "minLength": 1,
+            "title": "Recaptcha Token",
+            "type": "string"
+          },
+          "school_id": {
+            "minLength": 1,
+            "title": "School Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "display_name",
+          "school_id",
+          "recaptcha_token"
+        ],
+        "title": "RegisterRequest",
+        "type": "object"
+      },
+      "RegisterResponse": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "message": {
+            "default": "Registered. Check your email for a verification code.",
+            "title": "Message",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "email"
+        ],
+        "title": "RegisterResponse",
+        "type": "object"
+      },
+      "ReportDisruptionRequest": {
+        "properties": {
+          "affected_slots": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSlotRequest"
+            },
+            "minItems": 1,
+            "title": "Affected Slots",
+            "type": "array"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ReschedulingEventType"
+          },
+          "reason": {
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "request_id": {
+            "description": "Idempotency key (docs/04-DESIGN.md #Idempotency)",
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "target_entity_id": {
+            "minLength": 1,
+            "title": "Target Entity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "event_type",
+          "target_entity_id",
+          "affected_slots",
+          "reason"
+        ],
+        "title": "ReportDisruptionRequest",
+        "type": "object"
+      },
+      "RescheduleResponse": {
+        "properties": {
+          "directly_affected_lesson_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Directly Affected Lesson Ids",
+            "type": "array"
+          },
+          "disruption_cost": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisruptionCostResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "infeasibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InfeasibilityResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReschedulingStatus"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScheduleVersionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "RescheduleResponse",
+        "type": "object"
+      },
+      "ReschedulingEventResponse": {
+        "properties": {
+          "affected_slots": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSlotResponse"
+            },
+            "title": "Affected Slots",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "reported_at": {
+            "format": "date-time",
+            "title": "Reported At",
+            "type": "string"
+          },
+          "schedule_id": {
+            "title": "Schedule Id",
+            "type": "string"
+          },
+          "target_entity_id": {
+            "title": "Target Entity Id",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReschedulingEventType"
+          }
+        },
+        "required": [
+          "id",
+          "schedule_id",
+          "type",
+          "target_entity_id",
+          "affected_slots",
+          "reason",
+          "reported_at"
+        ],
+        "title": "ReschedulingEventResponse",
+        "type": "object"
+      },
+      "ReschedulingEventType": {
+        "description": "docs/03-ARCHITECTURE.md Edge Case Analysis #10-13.",
+        "enum": [
+          "TEACHER_UNAVAILABLE",
+          "ROOM_UNAVAILABLE",
+          "REQUIREMENT_ADDED",
+          "REQUIREMENT_REMOVED",
+          "TEACHER_REPLACED"
+        ],
+        "title": "ReschedulingEventType",
+        "type": "string"
+      },
+      "ReschedulingStatus": {
+        "description": "Mirrors `SolverStatus` (docs/04-DESIGN.md #14) but for a repair run,\nwhich always starts from an already-valid schedule, so INFEASIBLE\ndoesn't apply the same way \u2014 a repair that can't be found is\nUNREPAIRABLE (the pre-disruption schedule stays valid, only the\ndisruption's own lessons are stuck), not a from-scratch infeasibility.",
+        "enum": [
+          "REPAIRED",
+          "UNREPAIRABLE",
+          "FAILED"
+        ],
+        "title": "ReschedulingStatus",
+        "type": "string"
+      },
+      "ResendCodeRequest": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "ResendCodeRequest",
+        "type": "object"
+      },
+      "RoomResponse": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "room_type": {
+            "title": "Room Type",
+            "type": "string"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RoomStatus"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "name",
+          "capacity",
+          "room_type",
+          "capabilities",
+          "status"
+        ],
+        "title": "RoomResponse",
+        "type": "object"
+      },
+      "RoomStatus": {
+        "enum": [
+          "ACTIVE",
+          "CLOSED"
+        ],
+        "title": "RoomStatus",
+        "type": "string"
+      },
+      "RoomUpsertRequest": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "capacity": {
+            "exclusiveMinimum": 0.0,
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "room_type": {
+            "minLength": 1,
+            "title": "Room Type",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RoomStatus",
+            "default": "ACTIVE"
+          }
+        },
+        "required": [
+          "name",
+          "capacity",
+          "room_type"
+        ],
+        "title": "RoomUpsertRequest",
+        "type": "object"
+      },
+      "RoomUtilizationResponse": {
+        "properties": {
+          "available_slots": {
+            "title": "Available Slots",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "room_name": {
+            "title": "Room Name",
+            "type": "string"
+          },
+          "used_slots": {
+            "title": "Used Slots",
+            "type": "integer"
+          },
+          "utilization_ratio": {
+            "title": "Utilization Ratio",
+            "type": "number"
+          }
+        },
+        "required": [
+          "room_id",
+          "room_name",
+          "used_slots",
+          "available_slots",
+          "utilization_ratio"
+        ],
+        "title": "RoomUtilizationResponse",
+        "type": "object"
+      },
+      "ScheduleAnalyticsResponse": {
+        "properties": {
+          "class_coverages": {
+            "items": {
+              "$ref": "#/components/schemas/ClassCoverageResponse"
+            },
+            "title": "Class Coverages",
+            "type": "array"
+          },
+          "lesson_slots_per_week": {
+            "title": "Lesson Slots Per Week",
+            "type": "integer"
+          },
+          "room_utilizations": {
+            "items": {
+              "$ref": "#/components/schemas/RoomUtilizationResponse"
+            },
+            "title": "Room Utilizations",
+            "type": "array"
+          },
+          "teacher_workloads": {
+            "items": {
+              "$ref": "#/components/schemas/TeacherWorkloadResponse"
+            },
+            "title": "Teacher Workloads",
+            "type": "array"
+          },
+          "total_assignments": {
+            "title": "Total Assignments",
+            "type": "integer"
+          },
+          "workload_spread": {
+            "title": "Workload Spread",
+            "type": "number"
+          }
+        },
+        "required": [
+          "total_assignments",
+          "lesson_slots_per_week",
+          "workload_spread",
+          "teacher_workloads",
+          "room_utilizations",
+          "class_coverages"
+        ],
+        "title": "ScheduleAnalyticsResponse",
+        "type": "object"
+      },
+      "ScheduleAssignmentResponse": {
+        "properties": {
+          "class_id": {
+            "title": "Class Id",
+            "type": "string"
+          },
+          "day_id": {
+            "title": "Day Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lesson_id": {
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "title": "Time Period Id",
+            "type": "string"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version_id",
+          "lesson_id",
+          "teacher_id",
+          "class_id",
+          "room_id",
+          "time_period_id",
+          "day_id"
+        ],
+        "title": "ScheduleAssignmentResponse",
+        "type": "object"
+      },
+      "ScheduleResponse": {
+        "properties": {
+          "active_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Version Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "school_id"
+        ],
+        "title": "ScheduleResponse",
+        "type": "object"
+      },
+      "ScheduleScoreResponse": {
+        "properties": {
+          "hard_violations": {
+            "title": "Hard Violations",
+            "type": "integer"
+          },
+          "quality": {
+            "title": "Quality",
+            "type": "number"
+          },
+          "soft_penalty": {
+            "title": "Soft Penalty",
+            "type": "number"
+          }
+        },
+        "required": [
+          "hard_violations",
+          "soft_penalty",
+          "quality"
+        ],
+        "title": "ScheduleScoreResponse",
+        "type": "object"
+      },
+      "ScheduleVersionResponse": {
+        "properties": {
+          "assignment_count": {
+            "title": "Assignment Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "parent_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Version Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "schedule_id": {
+            "title": "Schedule Id",
+            "type": "string"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScheduleScoreResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ScheduleVersionStatus"
+          },
+          "version_tag": {
+            "title": "Version Tag",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "schedule_id",
+          "status",
+          "created_by",
+          "created_at",
+          "assignment_count",
+          "version_tag"
+        ],
+        "title": "ScheduleVersionResponse",
+        "type": "object"
+      },
+      "ScheduleVersionStatus": {
+        "description": "docs/04-DESIGN.md #25 state machine.",
+        "enum": [
+          "DRAFT",
+          "PUBLISHED",
+          "ARCHIVED"
+        ],
+        "title": "ScheduleVersionStatus",
+        "type": "string"
+      },
+      "SchedulingConfigResponse": {
+        "properties": {
+          "cooling_rate": {
+            "title": "Cooling Rate",
+            "type": "number"
+          },
+          "initial_temperature": {
+            "title": "Initial Temperature",
+            "type": "number"
+          },
+          "min_temperature": {
+            "title": "Min Temperature",
+            "type": "number"
+          },
+          "quality_decay_k": {
+            "title": "Quality Decay K",
+            "type": "number"
+          },
+          "random_seed": {
+            "title": "Random Seed",
+            "type": "integer"
+          },
+          "soft_constraint_weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Soft Constraint Weights",
+            "type": "object"
+          },
+          "timeout_seconds": {
+            "title": "Timeout Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timeout_seconds",
+          "random_seed",
+          "soft_constraint_weights",
+          "initial_temperature",
+          "cooling_rate",
+          "min_temperature",
+          "quality_decay_k"
+        ],
+        "title": "SchedulingConfigResponse",
+        "type": "object"
+      },
+      "SchedulingConfigUpdateRequest": {
+        "properties": {
+          "cooling_rate": {
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Cooling Rate",
+            "type": "number"
+          },
+          "initial_temperature": {
+            "exclusiveMinimum": 0.0,
+            "title": "Initial Temperature",
+            "type": "number"
+          },
+          "min_temperature": {
+            "exclusiveMinimum": 0.0,
+            "title": "Min Temperature",
+            "type": "number"
+          },
+          "quality_decay_k": {
+            "exclusiveMinimum": 0.0,
+            "title": "Quality Decay K",
+            "type": "number"
+          },
+          "random_seed": {
+            "title": "Random Seed",
+            "type": "integer"
+          },
+          "soft_constraint_weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Soft Constraint Weights",
+            "type": "object"
+          },
+          "timeout_seconds": {
+            "exclusiveMinimum": 0.0,
+            "title": "Timeout Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timeout_seconds",
+          "random_seed",
+          "soft_constraint_weights",
+          "initial_temperature",
+          "cooling_rate",
+          "min_temperature",
+          "quality_decay_k"
+        ],
+        "title": "SchedulingConfigUpdateRequest",
+        "type": "object"
+      },
+      "SchoolDayResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "weekday": {
+            "$ref": "#/components/schemas/Weekday"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "weekday",
+          "is_active"
+        ],
+        "title": "SchoolDayResponse",
+        "type": "object"
+      },
+      "SchoolDayUpsertRequest": {
+        "properties": {
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "weekday": {
+            "$ref": "#/components/schemas/Weekday"
+          }
+        },
+        "required": [
+          "weekday"
+        ],
+        "title": "SchoolDayUpsertRequest",
+        "type": "object"
+      },
+      "SchoolResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "timezone"
+        ],
+        "title": "SchoolResponse",
+        "type": "object"
+      },
+      "SchoolUpsertRequest": {
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "timezone": {
+            "minLength": 1,
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "timezone"
+        ],
+        "title": "SchoolUpsertRequest",
+        "type": "object"
+      },
+      "SearchStatsResponse": {
+        "properties": {
+          "backjumps": {
+            "title": "Backjumps",
+            "type": "integer"
+          },
+          "backtracks": {
+            "title": "Backtracks",
+            "type": "integer"
+          },
+          "candidates_tried": {
+            "title": "Candidates Tried",
+            "type": "integer"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "candidates_tried",
+          "backtracks",
+          "backjumps",
+          "duration_seconds"
+        ],
+        "title": "SearchStatsResponse",
+        "type": "object"
+      },
+      "Severity": {
+        "description": "Hard constraints always violate at ERROR severity. WARNING is\nreserved for soft-constraint threshold breaches (Phase 5).",
+        "enum": [
+          "ERROR",
+          "WARNING"
+        ],
+        "title": "Severity",
+        "type": "string"
+      },
+      "SolverStatus": {
+        "enum": [
+          "VALID",
+          "INFEASIBLE",
+          "FAILED",
+          "TIMEOUT"
+        ],
+        "title": "SolverStatus",
+        "type": "string"
+      },
+      "SubjectResponse": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "max_daily_occurrences": {
+            "title": "Max Daily Occurrences",
+            "type": "integer"
+          },
+          "min_spacing_days": {
+            "title": "Min Spacing Days",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "required_capability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Capability"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "name",
+          "code",
+          "max_daily_occurrences",
+          "min_spacing_days"
+        ],
+        "title": "SubjectResponse",
+        "type": "object"
+      },
+      "SubjectUpsertRequest": {
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "max_daily_occurrences": {
+            "default": 1,
+            "title": "Max Daily Occurrences",
+            "type": "integer"
+          },
+          "min_spacing_days": {
+            "default": 0,
+            "title": "Min Spacing Days",
+            "type": "integer"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "required_capability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Capability"
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ],
+        "title": "SubjectUpsertRequest",
+        "type": "object"
+      },
+      "TeacherResponse": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "max_consecutive": {
+            "title": "Max Consecutive",
+            "type": "integer"
+          },
+          "max_weekly_load": {
+            "title": "Max Weekly Load",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "subject_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subject Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "name",
+          "email",
+          "subject_ids",
+          "max_weekly_load",
+          "max_consecutive"
+        ],
+        "title": "TeacherResponse",
+        "type": "object"
+      },
+      "TeacherUpsertRequest": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "max_consecutive": {
+            "default": 4,
+            "title": "Max Consecutive",
+            "type": "integer"
+          },
+          "max_weekly_load": {
+            "default": 30,
+            "title": "Max Weekly Load",
+            "type": "integer"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "subject_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subject Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ],
+        "title": "TeacherUpsertRequest",
+        "type": "object"
+      },
+      "TeacherWorkloadResponse": {
+        "properties": {
+          "assigned_periods": {
+            "title": "Assigned Periods",
+            "type": "integer"
+          },
+          "load_ratio": {
+            "title": "Load Ratio",
+            "type": "number"
+          },
+          "max_weekly_load": {
+            "title": "Max Weekly Load",
+            "type": "integer"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "teacher_name": {
+            "title": "Teacher Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "teacher_id",
+          "teacher_name",
+          "assigned_periods",
+          "max_weekly_load",
+          "load_ratio"
+        ],
+        "title": "TeacherWorkloadResponse",
+        "type": "object"
+      },
+      "TimePeriodKind": {
+        "description": "Whether a TimePeriod may host a lesson or is a mandatory break (HC-007).",
+        "enum": [
+          "LESSON",
+          "BREAK"
+        ],
+        "title": "TimePeriodKind",
+        "type": "string"
+      },
+      "TimePeriodResponse": {
+        "properties": {
+          "end_time": {
+            "format": "time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TimePeriodKind"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "start_time": {
+            "format": "time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "school_id",
+          "index",
+          "start_time",
+          "end_time",
+          "kind"
+        ],
+        "title": "TimePeriodResponse",
+        "type": "object"
+      },
+      "TimePeriodUpsertRequest": {
+        "properties": {
+          "end_time": {
+            "format": "time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "index": {
+            "minimum": 0.0,
+            "title": "Index",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TimePeriodKind",
+            "default": "LESSON"
+          },
+          "start_time": {
+            "format": "time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimePeriodUpsertRequest",
+        "type": "object"
+      },
+      "TimeSlotRequest": {
+        "properties": {
+          "day_id": {
+            "minLength": 1,
+            "title": "Day Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "minLength": 1,
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "day_id",
+          "time_period_id"
+        ],
+        "title": "TimeSlotRequest",
+        "type": "object"
+      },
+      "TimeSlotResponse": {
+        "properties": {
+          "day_id": {
+            "title": "Day Id",
+            "type": "string"
+          },
+          "time_period_id": {
+            "title": "Time Period Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "day_id",
+          "time_period_id"
+        ],
+        "title": "TimeSlotResponse",
+        "type": "object"
+      },
+      "TimetableEntryResponse": {
+        "properties": {
+          "assignment_id": {
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "class_name": {
+            "title": "Class Name",
+            "type": "string"
+          },
+          "day_id": {
+            "title": "Day Id",
+            "type": "string"
+          },
+          "end_time": {
+            "format": "time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "period_index": {
+            "title": "Period Index",
+            "type": "integer"
+          },
+          "room_name": {
+            "title": "Room Name",
+            "type": "string"
+          },
+          "start_time": {
+            "format": "time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "subject_code": {
+            "title": "Subject Code",
+            "type": "string"
+          },
+          "subject_name": {
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "time_period_id": {
+            "title": "Time Period Id",
+            "type": "string"
+          },
+          "weekday": {
+            "$ref": "#/components/schemas/Weekday"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "day_id",
+          "weekday",
+          "time_period_id",
+          "period_index",
+          "start_time",
+          "end_time",
+          "class_name",
+          "room_name",
+          "subject_code",
+          "subject_name"
+        ],
+        "title": "TimetableEntryResponse",
+        "type": "object"
+      },
+      "UserResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email_verified": {
+            "title": "Email Verified",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "school_id": {
+            "title": "School Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Id"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "school_id",
+          "display_name",
+          "email_verified",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserResponse",
+        "type": "object"
+      },
+      "UserRole": {
+        "description": "docs/02-PRD.md #27. PENDING is a self-registered account that has\nverified its email/phone but has no permissions yet \u2014 an Admin must\napprove it (assigning ADMIN or TEACHER, and a teacher_id for the\nlatter) before it can do anything but read its own /auth/me record\n(docs/02-PRD.md #28a, added in the registration feature).",
+        "enum": [
+          "ADMIN",
+          "TEACHER",
+          "PENDING"
+        ],
+        "title": "UserRole",
+        "type": "string"
+      },
+      "ValidateMoveResponse": {
+        "properties": {
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "result": {
+            "enum": [
+              "VALID",
+              "WARNING",
+              "INVALID"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "violation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ViolationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "ValidateMoveResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyCodeRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 12,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "code"
+        ],
+        "title": "VerifyCodeRequest",
+        "type": "object"
+      },
+      "ViolationResponse": {
+        "properties": {
+          "constraint_id": {
+            "title": "Constraint Id",
+            "type": "string"
+          },
+          "involved_entities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Involved Entities",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          }
+        },
+        "required": [
+          "constraint_id",
+          "severity",
+          "message",
+          "involved_entities"
+        ],
+        "title": "ViolationResponse",
+        "type": "object"
+      },
+      "Weekday": {
+        "description": "A calendar weekday. SchoolDay.is_active selects which are in use,\nso a school's week is never hardcoded to Monday-Friday (master prompt #14).",
+        "enum": [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+          "SUNDAY"
+        ],
+        "title": "Weekday",
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "description": "Constraint-based school timetabling and dynamic rescheduling API.",
+    "title": "TimeForge API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/audit": {
+      "get": {
+        "operationId": "list_audit_events_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AuditEntityType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actor_user_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor User Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEventResponse"
+                  },
+                  "title": "Response List Audit Events Audit Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Audit Events",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/auth/complete-oauth-profile": {
+      "post": {
+        "operationId": "complete_oauth_profile_auth_complete_oauth_profile_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteOAuthProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete Oauth Profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "get_me_auth_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Me",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "register_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/resend-code": {
+      "post": {
+        "operationId": "resend_code_auth_resend_code_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resend Code",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/security/revoke-sessions": {
+      "post": {
+        "description": "Self-service \"sign out everywhere\": revokes every refresh token for\nthe caller's own account, including the one behind the request that\nmade this call \u2014 the frontend signs the current tab out locally right\nafter, so the user re-authenticates everywhere, on purpose.",
+        "operationId": "revoke_sessions_auth_security_revoke_sessions_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Sessions",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verify-code": {
+      "post": {
+        "operationId": "verify_code_auth_verify_code_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Code",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/availability": {
+      "get": {
+        "operationId": "list_availability_availability_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "owner_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/OwnerType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Owner Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "owner_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Owner Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AvailabilityResponse"
+                  },
+                  "title": "Response List Availability Availability Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Availability",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
+    "/availability/{availability_id}": {
+      "get": {
+        "operationId": "get_availability_availability__availability_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "availability_id",
+            "required": true,
+            "schema": {
+              "title": "Availability Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Availability",
+        "tags": [
+          "availability"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_availability_availability__availability_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "availability_id",
+            "required": true,
+            "schema": {
+              "title": "Availability Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Availability",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
+    "/classes": {
+      "get": {
+        "operationId": "list_entities_classes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClassResponse"
+                  },
+                  "title": "Response List Entities Classes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "classes"
+        ]
+      }
+    },
+    "/classes/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_classes__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "classes"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_classes__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "classes"
+        ]
+      }
+    },
+    "/constraints": {
+      "get": {
+        "operationId": "get_scheduling_config_constraints_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulingConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Scheduling Config",
+        "tags": [
+          "constraints"
+        ]
+      },
+      "put": {
+        "operationId": "update_scheduling_config_constraints_put",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulingConfigUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulingConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Scheduling Config",
+        "tags": [
+          "constraints"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "get_health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Get Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/lesson-requirements": {
+      "get": {
+        "operationId": "list_entities_lesson_requirements_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LessonRequirementResponse"
+                  },
+                  "title": "Response List Entities Lesson Requirements Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "lesson-requirements"
+        ]
+      }
+    },
+    "/lesson-requirements/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_lesson_requirements__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRequirementResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "lesson-requirements"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_lesson_requirements__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonRequirementUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRequirementResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "lesson-requirements"
+        ]
+      }
+    },
+    "/notifications/devices": {
+      "post": {
+        "description": "Idempotent: the mobile app re-registers on every launch, because FCM\ncan rotate a token at any time and the only way to notice is to send the\ncurrent one again.",
+        "operationId": "register_device_notifications_devices_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Device",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/notifications/devices/{token}": {
+      "delete": {
+        "description": "Called on sign-out so a shared or handed-on device stops receiving a\nformer user's school announcements.\n\nOnly the owner may unregister a token. Reports success either way rather\nthan 404-ing on someone else's token: the caller has no legitimate need\nto distinguish \"already gone\" from \"not yours\", and doing so would turn\nthis into an oracle for probing whether a given token is registered.",
+        "operationId": "unregister_device_notifications_devices__token__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unregister Device",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/periods": {
+      "get": {
+        "operationId": "list_entities_periods_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePeriodResponse"
+                  },
+                  "title": "Response List Entities Periods Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/periods/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_periods__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePeriodResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "periods"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_periods__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimePeriodUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePeriodResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/public/schools": {
+      "get": {
+        "operationId": "list_public_schools_public_schools_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicSchoolResponse"
+                  },
+                  "title": "Response List Public Schools Public Schools Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Public Schools",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/rooms": {
+      "get": {
+        "operationId": "list_entities_rooms_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoomResponse"
+                  },
+                  "title": "Response List Entities Rooms Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "rooms"
+        ]
+      }
+    },
+    "/rooms/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_rooms__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "rooms"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_rooms__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "rooms"
+        ]
+      }
+    },
+    "/schedules": {
+      "get": {
+        "operationId": "get_schedule_schedules_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Schedule",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/compare": {
+      "get": {
+        "operationId": "compare_schedule_versions_schedules_compare_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from_version_id",
+            "required": true,
+            "schema": {
+              "title": "From Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to_version_id",
+            "required": true,
+            "schema": {
+              "title": "To Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareVersionsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Compare Schedule Versions",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/generate": {
+      "post": {
+        "operationId": "generate_schedule_schedules_generate_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateScheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Schedule",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/my-timetable": {
+      "get": {
+        "description": "The caller's OWN published timetable, denormalized for a mobile\nclient. Scoped by `user.teacher_id` rather than a request parameter, so\na teacher can only ever fetch their own; an account with no linked\nteacher record simply has an empty timetable.",
+        "operationId": "get_my_timetable_schedules_my_timetable_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyTimetableResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get My Timetable",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/reschedule": {
+      "post": {
+        "operationId": "reschedule_schedules_reschedule_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDisruptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RescheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reschedule",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/rescheduling-events": {
+      "get": {
+        "operationId": "list_rescheduling_events_schedules_rescheduling_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReschedulingEventResponse"
+                  },
+                  "title": "Response List Rescheduling Events Schedules Rescheduling Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Rescheduling Events",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions": {
+      "get": {
+        "operationId": "list_schedule_versions_schedules_versions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduleVersionResponse"
+                  },
+                  "title": "Response List Schedule Versions Schedules Versions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Schedule Versions",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}": {
+      "get": {
+        "operationId": "get_schedule_version_schedules_versions__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Schedule Version",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/analytics": {
+      "get": {
+        "description": "Admin-only: workload/utilization reporting is management information\nabout staff, not something a teacher needs about their colleagues.",
+        "operationId": "get_schedule_analytics_schedules_versions__version_id__analytics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleAnalyticsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Schedule Analytics",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/apply-move": {
+      "post": {
+        "operationId": "apply_move_schedules_versions__version_id__apply_move_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyMoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleAssignmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Apply Move",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/assignments": {
+      "get": {
+        "operationId": "list_schedule_assignments_schedules_versions__version_id__assignments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduleAssignmentResponse"
+                  },
+                  "title": "Response List Schedule Assignments Schedules Versions  Version Id  Assignments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Schedule Assignments",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/publish": {
+      "post": {
+        "operationId": "publish_schedule_version_schedules_versions__version_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Schedule Version",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/validate-move": {
+      "post": {
+        "operationId": "validate_move_schedules_versions__version_id__validate_move_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposedMove"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateMoveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate Move",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/schedules/versions/{version_id}/violations": {
+      "get": {
+        "operationId": "list_version_violations_schedules_versions__version_id__violations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ViolationResponse"
+                  },
+                  "title": "Response List Version Violations Schedules Versions  Version Id  Violations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Version Violations",
+        "tags": [
+          "schedules"
+        ]
+      }
+    },
+    "/school-days": {
+      "get": {
+        "operationId": "list_entities_school_days_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SchoolDayResponse"
+                  },
+                  "title": "Response List Entities School Days Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/school-days/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_school_days__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolDayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "periods"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_school_days__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolDayUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolDayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/schools": {
+      "get": {
+        "operationId": "list_schools_schools_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SchoolResponse"
+                  },
+                  "title": "Response List Schools Schools Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Schools",
+        "tags": [
+          "schools"
+        ]
+      }
+    },
+    "/schools/{school_id}": {
+      "get": {
+        "operationId": "get_school_schools__school_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get School",
+        "tags": [
+          "schools"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_school_schools__school_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert School",
+        "tags": [
+          "schools"
+        ]
+      }
+    },
+    "/subjects": {
+      "get": {
+        "operationId": "list_entities_subjects_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubjectResponse"
+                  },
+                  "title": "Response List Entities Subjects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "subjects"
+        ]
+      }
+    },
+    "/subjects/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_subjects__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "subjects"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_subjects__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "subjects"
+        ]
+      }
+    },
+    "/teachers": {
+      "get": {
+        "operationId": "list_entities_teachers_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherResponse"
+                  },
+                  "title": "Response List Entities Teachers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "teachers"
+        ]
+      }
+    },
+    "/teachers/{entity_id}": {
+      "get": {
+        "operationId": "get_entity_teachers__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "teachers"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_entity_teachers__entity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "school_id",
+            "required": true,
+            "schema": {
+              "title": "School Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeacherUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Entity",
+        "tags": [
+          "teachers"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Every account that has *already* been assigned a role \u2014 the\ncounterpart to `/users/pending`, for suspending/reactivating existing\nAdmins and Teachers rather than reviewing new registrations.",
+        "operationId": "list_users_users_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserResponse"
+                  },
+                  "title": "Response List Users Users Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Users",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/pending": {
+      "get": {
+        "operationId": "list_pending_users_users_pending_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PendingUserResponse"
+                  },
+                  "title": "Response List Pending Users Users Pending Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Pending Users",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{user_id}/approve": {
+      "post": {
+        "operationId": "approve_user_users__user_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{user_id}/reactivate": {
+      "post": {
+        "operationId": "reactivate_user_users__user_id__reactivate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reactivate User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{user_id}/reject": {
+      "post": {
+        "operationId": "reject_user_users__user_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{user_id}/suspend": {
+      "post": {
+        "operationId": "suspend_user_users__user_id__suspend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suspend User",
+        "tags": [
+          "users"
+        ]
+      }
+    }
+  }
+}

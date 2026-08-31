@@ -1,66 +1,29 @@
-import type { UserRole } from './enums'
+/**
+ * Identity, registration and the admin approval flow.
+ *
+ * Aliases over the generated OpenAPI schema — see `catalog.ts` for why the
+ * frontend no longer keeps its own copy of these shapes.
+ */
+import type { components } from './api.generated'
 
-/** Mirrors backend/app/api/schemas/auth.py's UserResponse. */
-export interface User {
-  id: string
-  role: UserRole
-  school_id: string
-  display_name: string
-  teacher_id: string | null
-  email_verified: boolean
-  is_active: boolean
-  created_at: string
-}
+type Schemas = components['schemas']
 
-/** Mirrors backend/app/api/schemas/school.py's PublicSchoolResponse — the
- * unauthenticated school picker shown on the registration page. */
-export interface PublicSchool {
-  id: string
-  name: string
-}
+/** The backend's own record of the signed-in user: role, school and the
+ * linked teacher id. The role here is authoritative — it is never taken
+ * from the Firebase identity. */
+export type User = Schemas['UserResponse']
 
-export interface RegisterRequest {
-  email: string
-  password: string
-  display_name: string
-  school_id: string
-  recaptcha_token: string
-}
+/** The unauthenticated school picker on the registration page. */
+export type PublicSchool = Schemas['PublicSchoolResponse']
 
-export interface RegisterResponse {
-  user_id: string
-  email: string
-  message: string
-}
+export type RegisterRequest = Schemas['RegisterRequest']
+export type RegisterResponse = Schemas['RegisterResponse']
 
-export interface PendingUser {
-  id: string
-  email: string
-  display_name: string
-  school_id: string
-  created_at: string
-}
+export type PendingUser = Schemas['PendingUserResponse']
+export type ApproveUserRequest = Schemas['ApproveUserRequest']
 
-export interface ApproveUserRequest {
-  role: 'ADMIN' | 'TEACHER'
-  teacher_id: string | null
-}
+/** The admin-facing "all users" list — unlike `User`, it carries the email
+ * address, because an admin managing accounts needs to tell them apart. */
+export type AdminUser = Schemas['AdminUserResponse']
 
-/** Mirrors backend/app/api/schemas/auth.py's AdminUserResponse — the
- * "all users" list used for suspend/reactivate, distinct from the
- * pending-approval queue. */
-export interface AdminUser {
-  id: string
-  email: string
-  role: UserRole
-  school_id: string
-  display_name: string
-  teacher_id: string | null
-  is_active: boolean
-  created_at: string
-}
-
-export interface CompleteOAuthProfileRequest {
-  display_name: string
-  school_id: string
-}
+export type CompleteOAuthProfileRequest = Schemas['CompleteOAuthProfileRequest']
