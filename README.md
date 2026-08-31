@@ -87,6 +87,25 @@ uv run ruff check .
 uv run pyright
 ```
 
+### Create your first admin account
+
+The app ships with no demo/sample data — every self-registered account
+starts as PENDING and needs an existing Administrator to approve it, so
+the very first admin has to be created directly:
+
+```bash
+cd backend
+uv run python -m scripts.create_admin \
+  --school-name "Your School" \
+  --school-timezone "America/New_York" \
+  --admin-email you@example.com \
+  --admin-display-name "Your Name"
+```
+
+It prompts for a password (never a CLI argument) and works against
+whichever Firebase project/emulator your current `.env` points at. See
+`backend/scripts/create_admin.py`'s module docstring for details.
+
 ### Frontend
 
 ```bash
@@ -114,6 +133,39 @@ npm install
 npx playwright install chromium
 npm run test
 ```
+
+## Deploying to Production
+
+The codebase has no hardcoded demo/mock data or default credentials —
+everything below is configuration, not code changes. Before going live:
+
+- **Point at a real Firebase project, not the emulator.** In `backend/.env`,
+  unset `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST`, and set
+  `FIREBASE_SERVICE_ACCOUNT_PATH` to a real service-account key (or run
+  somewhere with Application Default Credentials, e.g. Cloud Run). In
+  `frontend/.env`, set `VITE_USE_FIREBASE_EMULATOR=false` and fill in the
+  real `VITE_FIREBASE_*` values from your Firebase project settings. The
+  backend logs a startup warning (`app.main`) if it's still pointed at an
+  emulator.
+- **Set `API_CORS_ORIGINS`** to your real frontend origin(s) — it defaults
+  to `http://localhost:5173` for local dev only.
+- **Configure reCAPTCHA and SMTP for real.** Both silently no-op when
+  unset (no bot protection on registration; verification codes log to the
+  console instead of emailing) — fine for local dev, a real gap in
+  production. The backend logs a startup warning for each if left unset.
+  Get a reCAPTCHA v2 key pair at https://www.google.com/recaptcha/admin
+  and set `RECAPTCHA_SECRET_KEY` (backend) / `VITE_RECAPTCHA_SITE_KEY`
+  (frontend); set `SMTP_USERNAME`/`SMTP_PASSWORD`/`SMTP_FROM_EMAIL` for a
+  real sending account.
+- **Deploy `firestore.rules` and `firestore.indexes.json`** to the real
+  project (`firebase deploy --only firestore`) — the rules are
+  deny-by-default and already production-grade, but they only take effect
+  once deployed.
+- **Set `VITE_API_BASE_URL`** to your real backend URL — it defaults to
+  `http://localhost:8000` for local dev only.
+- **Bootstrap your first admin** against the real project with
+  `scripts/create_admin.py` (see above) — this replaces the old
+  `scripts/seed.py` demo-data script, which no longer exists.
 
 ## Project Status
 

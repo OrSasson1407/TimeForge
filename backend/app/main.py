@@ -4,6 +4,8 @@ This module only wires up the app (middleware, routers). Business logic
 lives in app/application and app/domain (docs/01-CLAUDE.md rule 4).
 """
 
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -21,9 +23,44 @@ from app.api.routers import (
     users,
 )
 from app.api.schemas.common import ErrorDetail, ErrorEnvelope
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.core.errors import DomainError
 from app.core.logging import setup_logging
+
+logger = logging.getLogger(__name__)
+
+
+def _warn_about_unconfigured_production_settings(settings: Settings) -> None:
+    """A loud, startup-time nag for settings that silently degrade instead
+    of failing when left unset — real dev conveniences (registration works
+    without a reCAPTCHA provider, verification codes log to the console
+    instead of emailing), but exactly the kind of thing that's easy to
+    forget before a real deployment and dangerous to leave unnoticed:
+    unconfigured reCAPTCHA means registration has NO bot protection at all,
+    not a degraded version of it. Never blocks startup — only makes the gap
+    impossible to miss in the logs."""
+    if not settings.recaptcha_secret_key:
+        logger.warning(
+            "RECAPTCHA_SECRET_KEY is not set — registration has NO bot protection. "
+            "Fine for local dev; set a real key before deploying to production."
+        )
+    if not settings.smtp_username or not settings.smtp_password:
+        logger.warning(
+            "SMTP_USERNAME/SMTP_PASSWORD are not set — verification codes are "
+            "logged to the console instead of emailed. Fine for local dev; "
+            "configure real SMTP credentials before deploying to production."
+        )
+    if not settings.password_check_breached:
+        logger.warning(
+            "PASSWORD_CHECK_BREACHED is disabled — registration accepts passwords "
+            "already known to be in public breach dumps."
+        )
+    if settings.firestore_emulator_host or settings.firebase_auth_emulator_host:
+        logger.warning(
+            "Running against the Firebase Emulator Suite (FIRESTORE_EMULATOR_HOST/"
+            "FIREBASE_AUTH_EMULATOR_HOST is set) — nothing written this run will "
+            "persist. Unset both before deploying to production."
+        )
 
 
 def _domain_error_handler(_request: Request, exc: Exception) -> JSONResponse:
@@ -40,6 +77,7 @@ def _domain_error_handler(_request: Request, exc: Exception) -> JSONResponse:
 def create_app() -> FastAPI:
     settings = get_settings()
     setup_logging(settings.log_level)
+    _warn_about_unconfigured_production_settings(settings)
 
     app = FastAPI(
         title="TimeForge API",

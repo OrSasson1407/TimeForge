@@ -76,7 +76,7 @@ The MVP must include, end-to-end and working (not mocked):
 - Dynamic rescheduling for teacher absence and room unavailability, with disruption minimization and change explanations.
 - Audit log for all significant mutations.
 - Firebase Authentication with Administrator and Teacher roles, enforced server-side.
-- Seed data for a realistic demo school.
+- A one-time bootstrap script (`scripts/create_admin.py`) for a deployment's first Administrator account. No demo/sample data ships with the app — a fresh deployment starts with nothing but that one admin, who populates the real catalog through the app itself.
 
 ## 11. Future Scope
 
