@@ -16,12 +16,15 @@ from app.api.dependencies import (
     get_current_user,
     get_generate_schedule_use_case,
     get_list_violations_use_case,
+    get_my_timetable_use_case,
+    get_notify_schedule_published_use_case,
     get_publish_schedule_use_case,
     get_reschedule_use_case,
     get_rescheduling_event_repository,
     get_schedule_analytics_use_case,
     get_schedule_repository,
     get_schedule_version_repository,
+    get_school_repository,
     get_validate_move_use_case,
     require_admin,
 )
@@ -38,6 +41,7 @@ from app.api.schemas.schedule import (
     CompareVersionsResponse,
     GenerateScheduleRequest,
     GenerateScheduleResponse,
+    MyTimetableResponse,
     ProposedMove,
     PublishRequest,
     ScheduleAnalyticsResponse,
@@ -49,6 +53,7 @@ from app.api.schemas.schedule import (
     analytics_to_response,
     assignment_to_response,
     infeasibility_to_response,
+    my_timetable_to_response,
     schedule_to_response,
     stats_to_response,
     version_to_response,
@@ -57,6 +62,7 @@ from app.application.repositories import (
     ReschedulingEventRepository,
     ScheduleRepository,
     ScheduleVersionRepository,
+    SchoolRepository,
 )
 from app.application.use_cases import (
     ApplyMoveUseCase,
@@ -64,6 +70,8 @@ from app.application.use_cases import (
     CompareVersionsUseCase,
     GenerateScheduleUseCase,
     ListViolationsUseCase,
+    MyTimetableUseCase,
+    NotifySchedulePublishedUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
     ScheduleAnalyticsUseCase,
@@ -138,6 +146,21 @@ def list_schedule_assignments(
     repository: ScheduleVersionRepository = Depends(get_schedule_version_repository),
 ) -> list[ScheduleAssignmentResponse]:
     return [assignment_to_response(a) for a in repository.list_assignments(school_id, version_id)]
+
+
+@router.get("/my-timetable", response_model=MyTimetableResponse)
+def get_my_timetable(
+    school_id: str = Query(...),
+    user: User = Depends(get_current_user),
+    use_case: MyTimetableUseCase = Depends(get_my_timetable_use_case),
+) -> MyTimetableResponse:
+    """The caller's OWN published timetable, denormalized for a mobile
+    client. Scoped by `user.teacher_id` rather than a request parameter, so
+    a teacher can only ever fetch their own; an account with no linked
+    teacher record simply has an empty timetable."""
+    if user.school_id != school_id or not user.teacher_id:
+        return MyTimetableResponse(version_id=None, entries=[])
+    return my_timetable_to_response(use_case.execute(school_id, user.teacher_id))
 
 
 @router.get("/versions/{version_id}/analytics", response_model=ScheduleAnalyticsResponse)
@@ -243,6 +266,8 @@ def publish_schedule_version(
     school_id: str = Query(...),
     user: User = Depends(require_admin),
     use_case: PublishScheduleUseCase = Depends(get_publish_schedule_use_case),
+    notifier: NotifySchedulePublishedUseCase = Depends(get_notify_schedule_published_use_case),
+    school_repository: SchoolRepository = Depends(get_school_repository),
 ) -> ScheduleVersionResponse:
     published = use_case.execute(
         school_id, version_id, expected_version_tag=body.expected_version_tag, actor=user
@@ -251,6 +276,10 @@ def publish_schedule_version(
         topic_for_version(school_id, version_id),
         {"type": "schedule-changed", "change": "published", "actor": user.display_name},
     )
+    # Publishing is the only event that pushes to phones — see
+    # NotifySchedulePublishedUseCase for why draft edits deliberately do not.
+    school = school_repository.get(school_id)
+    notifier.execute(school_id, school_name=school.name if school else "your school")
     return version_to_response(published)
 
 

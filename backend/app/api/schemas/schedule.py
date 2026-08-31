@@ -3,10 +3,11 @@ request/response shapes for the scheduling workflow endpoints (generate,
 validate-move, apply-move, publish, compare) — docs/03-ARCHITECTURE.md #26.
 """
 
-from datetime import datetime
+from datetime import datetime, time
 
 from pydantic import BaseModel, Field
 
+from app.application.use_cases.my_timetable import MyTimetable
 from app.application.use_cases.schedule_analytics import ScheduleAnalytics
 from app.domain.constraints.violation import Severity
 from app.domain.models import (
@@ -15,6 +16,7 @@ from app.domain.models import (
     ScheduleScoreSummary,
     ScheduleVersion,
     ScheduleVersionStatus,
+    Weekday,
 )
 from app.domain.scheduling.infeasibility import BottleneckReport, InfeasibilityResult
 from app.domain.scheduling.result import ScheduleResult, SearchStats, SolverStatus
@@ -293,3 +295,47 @@ class CompareVersionsResponse(BaseModel):
     removed: list[AssignmentDiffEntry]
     moved: list[AssignmentDiffEntry]
     unchanged_count: int
+
+
+# --- My timetable (mobile) ---
+
+
+class TimetableEntryResponse(BaseModel):
+    assignment_id: str
+    day_id: str
+    weekday: Weekday
+    time_period_id: str
+    period_index: int
+    start_time: time
+    end_time: time
+    class_name: str
+    room_name: str
+    subject_code: str
+    subject_name: str
+
+
+class MyTimetableResponse(BaseModel):
+    version_id: str | None = None
+    entries: list[TimetableEntryResponse]
+
+
+def my_timetable_to_response(timetable: MyTimetable) -> MyTimetableResponse:
+    return MyTimetableResponse(
+        version_id=timetable.version_id,
+        entries=[
+            TimetableEntryResponse(
+                assignment_id=e.assignment_id,
+                day_id=e.day_id,
+                weekday=e.weekday,
+                time_period_id=e.time_period_id,
+                period_index=e.period_index,
+                start_time=e.start_time,
+                end_time=e.end_time,
+                class_name=e.class_name,
+                room_name=e.room_name,
+                subject_code=e.subject_code,
+                subject_name=e.subject_name,
+            )
+            for e in timetable.entries
+        ],
+    )

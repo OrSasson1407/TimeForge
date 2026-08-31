@@ -210,8 +210,19 @@ rather than the source of the numbers above; the `backjumps` counter in
 
 **Also added:** an Analytics dashboard (teacher workload balance, room
 utilization, curriculum coverage), live collaboration over WebSockets
-(presence plus auto-refetch when a colleague edits the same version), and
-the CI/CD pipeline described above.
+(presence plus auto-refetch when a colleague edits the same version), the
+CI/CD pipeline described above, and an Expo/React Native companion app for
+teachers (`mobile/`).
+
+The mobile app is offline-first — it renders from an AsyncStorage cache
+immediately and refreshes behind it — and is fed by one denormalized,
+server-scoped endpoint (`GET /schedules/my-timetable`) plus push
+notifications on publish. **Read `mobile/README.md` before relying on it:**
+its pure logic is unit-tested and the whole app type-checks, but the
+screens and the push path have never been run on a simulator or a handset,
+because this codebase was built without an Android SDK or Xcode. A student
+view is not included — there is no STUDENT role in the domain yet, which is
+a backend modelling change rather than a mobile one.
 
 Complete through Phase 10 (Quality) — all ten phases of the implementation phase order in [docs/01-CLAUDE.md](docs/01-CLAUDE.md) §"Agent Workflow" (Domain → Constraints → Scheduling Engine → Optimization → Firebase → API → Frontend → Rescheduling → Quality):
 

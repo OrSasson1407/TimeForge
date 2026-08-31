@@ -16,9 +16,12 @@ from app.api.dependencies import (
     get_availability_repository,
     get_class_repository,
     get_current_user,
+    get_device_token_repository,
     get_email_sender,
     get_identity_admin,
     get_lesson_requirement_repository,
+    get_notify_schedule_published_use_case,
+    get_push_sender,
     get_register_rate_limiter,
     get_rescheduling_event_repository,
     get_resend_code_rate_limiter,
@@ -35,6 +38,7 @@ from app.api.dependencies import (
     get_user_repository,
     get_verification_repository,
 )
+from app.application.use_cases import NotifySchedulePublishedUseCase
 from app.core.config import Settings
 from app.core.rate_limit import RateLimiter
 from app.domain.models import User, UserRole
@@ -42,8 +46,10 @@ from app.main import app
 from tests.support.fakes import (
     FakeAuditRepository,
     FakeAvailabilityRepository,
+    FakeDeviceTokenRepository,
     FakeEmailSender,
     FakeIdentityAdmin,
+    FakePushSender,
     FakeRepository,
     FakeReschedulingEventRepository,
     FakeScheduleRepository,
@@ -76,6 +82,8 @@ class ApiFixtures:
     verifications: FakeVerificationCodeRepository
     identity_admin: FakeIdentityAdmin
     email_sender: FakeEmailSender
+    devices: FakeDeviceTokenRepository
+    push_sender: FakePushSender
 
     def set_current_user(self, user: User) -> None:
         app.dependency_overrides[get_current_user] = lambda: user
@@ -120,6 +128,8 @@ def api() -> Iterator[ApiFixtures]:
     verifications = FakeVerificationCodeRepository()
     identity_admin = FakeIdentityAdmin()
     email_sender = FakeEmailSender()
+    devices = FakeDeviceTokenRepository()
+    push_sender = FakePushSender()
     # Generous, per-test-fresh limiters: tests exercising throttling itself
     # override these again with a tight limiter (see test_registration.py).
     register_rate_limiter = RateLimiter(max_calls=1000, window_seconds=3600)
@@ -151,6 +161,11 @@ def api() -> Iterator[ApiFixtures]:
     app.dependency_overrides[get_verification_repository] = lambda: verifications
     app.dependency_overrides[get_identity_admin] = lambda: identity_admin
     app.dependency_overrides[get_email_sender] = lambda: email_sender
+    app.dependency_overrides[get_device_token_repository] = lambda: devices
+    app.dependency_overrides[get_push_sender] = lambda: push_sender
+    app.dependency_overrides[get_notify_schedule_published_use_case] = lambda: (
+        NotifySchedulePublishedUseCase(device_repository=devices, push_sender=push_sender)
+    )
     app.dependency_overrides[get_register_rate_limiter] = lambda: register_rate_limiter
     app.dependency_overrides[get_resend_code_rate_limiter] = lambda: resend_rate_limiter
     app.dependency_overrides[get_settings] = lambda: test_settings
@@ -176,6 +191,8 @@ def api() -> Iterator[ApiFixtures]:
             verifications=verifications,
             identity_admin=identity_admin,
             email_sender=email_sender,
+            devices=devices,
+            push_sender=push_sender,
         )
     finally:
         app.dependency_overrides.clear()

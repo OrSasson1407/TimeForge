@@ -15,6 +15,7 @@ from app.application.repositories.catalog import (
     TeacherRepository,
     TimePeriodRepository,
 )
+from app.application.repositories.device import DeviceTokenRepository, PushSenderPort
 from app.application.repositories.generic import Repository
 from app.application.repositories.identity_admin import IdentityAdminPort
 from app.application.repositories.rescheduling import ReschedulingEventRepository
@@ -28,8 +29,10 @@ __all__ = [
     "AuditRepository",
     "AvailabilityRepository",
     "ClassRepository",
+    "DeviceTokenRepository",
     "IdentityAdminPort",
     "LessonRequirementRepository",
+    "PushSenderPort",
     "ReschedulingEventRepository",
     "Repository",
     "RoomRepository",

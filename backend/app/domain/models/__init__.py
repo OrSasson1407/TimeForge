@@ -7,6 +7,7 @@ Pure Python dataclasses with no dependency on FastAPI or Firebase
 from app.domain.models.audit import Actor, AuditEvent
 from app.domain.models.availability import Availability
 from app.domain.models.class_ import Class
+from app.domain.models.device import DevicePlatform, DeviceToken
 from app.domain.models.enums import (
     AuditEntityType,
     AuditOperation,
@@ -35,6 +36,8 @@ from app.domain.models.value_objects import TimeSlot
 from app.domain.models.verification import EmailVerification
 
 __all__ = [
+    "DevicePlatform",
+    "DeviceToken",
     "Actor",
     "AuditEntityType",
     "AuditEvent",

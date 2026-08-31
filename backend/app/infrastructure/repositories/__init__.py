@@ -17,6 +17,7 @@ from app.infrastructure.repositories.catalog_firestore import (
     build_teacher_repository,
     build_time_period_repository,
 )
+from app.infrastructure.repositories.device_firestore import FirestoreDeviceTokenRepository
 from app.infrastructure.repositories.rescheduling_firestore import (
     FirestoreReschedulingEventRepository,
 )
@@ -41,6 +42,7 @@ __all__ = [
     "FirestoreSchedulingConfigRepository",
     "FirestoreScheduleVersionRepository",
     "FirestoreSchoolRepository",
+    "FirestoreDeviceTokenRepository",
     "FirestoreUserRepository",
     "FirestoreVerificationCodeRepository",
     "build_class_repository",

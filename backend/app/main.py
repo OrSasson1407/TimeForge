@@ -20,6 +20,7 @@ from app.api.routers import (
     catalog,
     collaboration,
     health,
+    notifications,
     public,
     schedule,
     scheduling_config,
@@ -127,6 +128,7 @@ def create_app() -> FastAPI:
     app.include_router(schedule.router)
     app.include_router(audit.router)
     app.include_router(collaboration.router)
+    app.include_router(notifications.router)
 
     return app
 
