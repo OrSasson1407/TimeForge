@@ -14,8 +14,10 @@ from app.application.repositories import (
     AuditRepository,
     AvailabilityRepository,
     ClassRepository,
+    DeviceTokenRepository,
     IdentityAdminPort,
     LessonRequirementRepository,
+    PushSenderPort,
     ReschedulingEventRepository,
     RoomRepository,
     ScheduleRepository,
@@ -34,8 +36,11 @@ from app.application.use_cases import (
     CompareVersionsUseCase,
     GenerateScheduleUseCase,
     ListViolationsUseCase,
+    MyTimetableUseCase,
+    NotifySchedulePublishedUseCase,
     PublishScheduleUseCase,
     RescheduleUseCase,
+    ScheduleAnalyticsUseCase,
     ValidateMoveUseCase,
 )
 from app.core.config import get_settings
@@ -45,9 +50,11 @@ from app.domain.models import User, UserRole
 from app.infrastructure.email import EmailSender, SmtpEmailSender
 from app.infrastructure.firebase.auth import FirebaseIdentityAdmin, resolve_user
 from app.infrastructure.firebase.client import get_firestore_client
+from app.infrastructure.push import FcmPushSender, LoggingPushSender
 from app.infrastructure.repositories import (
     FirestoreAuditRepository,
     FirestoreAvailabilityRepository,
+    FirestoreDeviceTokenRepository,
     FirestoreReschedulingEventRepository,
     FirestoreScheduleRepository,
     FirestoreScheduleVersionRepository,
@@ -135,6 +142,33 @@ def get_audit_repository() -> AuditRepository:
 @lru_cache
 def get_user_repository() -> UserRepository:
     return FirestoreUserRepository(get_firestore_client())
+
+
+@lru_cache
+def get_device_token_repository() -> DeviceTokenRepository:
+    return FirestoreDeviceTokenRepository(get_firestore_client())
+
+
+@lru_cache
+def get_push_sender() -> PushSenderPort:
+    """Mirrors `get_email_sender`'s dev fallback: with no Firebase service
+    account configured there is no FCM project to send through, so pushes
+    are logged instead. Local development and tests therefore need no push
+    credentials at all."""
+    settings = get_settings()
+    if settings.firebase_service_account_path or not (
+        settings.firestore_emulator_host or settings.firebase_auth_emulator_host
+    ):
+        return FcmPushSender()
+    return LoggingPushSender()
+
+
+@lru_cache
+def get_notify_schedule_published_use_case() -> NotifySchedulePublishedUseCase:
+    return NotifySchedulePublishedUseCase(
+        device_repository=get_device_token_repository(),
+        push_sender=get_push_sender(),
+    )
 
 
 @lru_cache
@@ -264,6 +298,56 @@ def get_validate_move_use_case(
         school_day_repository=school_day_repository,
         time_period_repository=time_period_repository,
         scheduling_config_repository=scheduling_config_repository,
+    )
+
+
+def get_schedule_analytics_use_case(
+    schedule_version_repository: ScheduleVersionRepository = Depends(
+        get_schedule_version_repository
+    ),
+    teacher_repository: TeacherRepository = Depends(get_teacher_repository),
+    class_repository: ClassRepository = Depends(get_class_repository),
+    room_repository: RoomRepository = Depends(get_room_repository),
+    requirement_repository: LessonRequirementRepository = Depends(
+        get_lesson_requirement_repository
+    ),
+    school_day_repository: SchoolDayRepository = Depends(get_school_day_repository),
+    time_period_repository: TimePeriodRepository = Depends(get_time_period_repository),
+) -> ScheduleAnalyticsUseCase:
+    return ScheduleAnalyticsUseCase(
+        schedule_version_repository=schedule_version_repository,
+        teacher_repository=teacher_repository,
+        class_repository=class_repository,
+        room_repository=room_repository,
+        requirement_repository=requirement_repository,
+        school_day_repository=school_day_repository,
+        time_period_repository=time_period_repository,
+    )
+
+
+def get_my_timetable_use_case(
+    schedule_repository: ScheduleRepository = Depends(get_schedule_repository),
+    schedule_version_repository: ScheduleVersionRepository = Depends(
+        get_schedule_version_repository
+    ),
+    class_repository: ClassRepository = Depends(get_class_repository),
+    room_repository: RoomRepository = Depends(get_room_repository),
+    subject_repository: SubjectRepository = Depends(get_subject_repository),
+    requirement_repository: LessonRequirementRepository = Depends(
+        get_lesson_requirement_repository
+    ),
+    school_day_repository: SchoolDayRepository = Depends(get_school_day_repository),
+    time_period_repository: TimePeriodRepository = Depends(get_time_period_repository),
+) -> MyTimetableUseCase:
+    return MyTimetableUseCase(
+        schedule_repository=schedule_repository,
+        schedule_version_repository=schedule_version_repository,
+        class_repository=class_repository,
+        room_repository=room_repository,
+        subject_repository=subject_repository,
+        requirement_repository=requirement_repository,
+        school_day_repository=school_day_repository,
+        time_period_repository=time_period_repository,
     )
 
 

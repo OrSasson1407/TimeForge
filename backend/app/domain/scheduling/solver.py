@@ -18,15 +18,20 @@ placement attempt) before being committed.
 """
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from app.domain.constraints.evaluator import ConstraintEvaluator
 from app.domain.models.value_objects import TimeSlot
+from app.domain.scheduling.conflicts import (
+    blocking_lesson_ids,
+    domain_wipeout_culprits,
+    every_assigned_lesson_id,
+)
 from app.domain.scheduling.heuristics import (
     LessonDomain,
     build_lesson_domains,
     compute_degrees,
-    forward_check,
+    forward_check_detailed,
     least_constraining_value_order,
     select_next_lesson,
 )
@@ -44,6 +49,7 @@ class SearchRunStats:
 
     candidates_tried: int = 0
     backtracks: int = 0
+    backjumps: int = 0
 
 
 @dataclass
@@ -53,6 +59,18 @@ class _Frame:
     lesson_index: int | None = None
     candidates: list[TimeSlot] | None = None
     next_index: int = 0
+    #: Lessons already placed *before* this frame that were implicated in
+    #: one of this frame's failed placements — the conflict set driving
+    #: backjumping (see `scheduling/conflicts.py`).
+    conflict_set: set[str] = field(default_factory=set)
+
+    @property
+    def current_lesson_id(self) -> str | None:
+        """The lesson this frame is currently trying to place, if it has
+        picked one yet."""
+        if self.lesson_index is None:
+            return None
+        return self.remaining[self.lesson_index][0].id
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,7 +97,18 @@ def run_search(
     (docs/04-DESIGN.md #17's "same solver as §15") rather than two
     implementations of search.
     """
-    stack: list[_Frame] = [_Frame(state=initial_state, remaining=initial_domains)]
+    # One full sweep up front, because `initial_domains` is built from the
+    # problem alone (`candidate_slots_for`) and has never been reconciled
+    # with `initial_state` — which matters for rescheduling, where that
+    # state arrives pre-loaded with frozen assignments. Every later check is
+    # incremental against the single slot just consumed, which is exactly
+    # equivalent once this baseline is established (see
+    # `forward_check_detailed`).
+    initial_check = forward_check_detailed(initial_state, initial_domains, problem)
+    if initial_check.pruned is None:
+        return SearchOutcome(kind="failure", state=initial_state)
+
+    stack: list[_Frame] = [_Frame(state=initial_state, remaining=initial_check.pruned)]
     deepest_state = initial_state
 
     while stack:
@@ -106,23 +135,58 @@ def run_search(
             stats.candidates_tried += 1
 
             candidate = problem.resolve_placement(lesson, slot, frame.state)
-            if candidate is None or not evaluator.is_candidate_valid(frame.state, candidate):
+            if candidate is None:
+                frame.conflict_set |= blocking_lesson_ids(lesson, slot, frame.state, problem)
+                continue
+            if not evaluator.is_candidate_valid(frame.state, candidate):
+                # Rejected by a hard constraint beyond the teacher/class/room
+                # clashes resolve_placement already screens for (capability,
+                # capacity, a break period, ...). Those can depend on the
+                # whole state in ways this layer can't attribute cheaply, so
+                # take the always-safe superset rather than risk an
+                # under-approximate conflict set (see conflicts.py).
+                frame.conflict_set |= every_assigned_lesson_id(frame.state)
                 continue
 
             new_state = frame.state.with_assignment(candidate)
             if len(new_state.assignments) > len(deepest_state.assignments):
                 deepest_state = new_state
-            pruned_rest = forward_check(new_state, rest, problem)
-            if pruned_rest is None:
+            check = forward_check_detailed(new_state, rest, problem, changed_slot=slot)
+            if check.pruned is None:
+                assert check.wiped_out is not None  # guaranteed when pruned is None
+                # `lesson` itself is excluded: it is this frame's own
+                # variable, and trying its other slots is precisely what
+                # this loop is already doing.
+                frame.conflict_set |= domain_wipeout_culprits(
+                    check.wiped_out, check.wiped_domain, new_state, problem
+                ) - {lesson.id}
                 continue
 
-            stack.append(_Frame(state=new_state, remaining=pruned_rest))
+            stack.append(_Frame(state=new_state, remaining=check.pruned, conflict_set=set()))
             advanced = True
             break
 
         if not advanced:
             stats.backtracks += 1
-            stack.pop()
+            failed = stack.pop()
+            # Standard CBJ: jump to the deepest still-open decision that is
+            # actually implicated, absorbing the failed frame's reasons on
+            # the way. Every frame skipped is a subtree chronological
+            # backtracking would have re-explored only to fail identically.
+            conflict = set(failed.conflict_set)
+            conflict.discard(lesson.id)
+            while stack:
+                target = stack[-1]
+                target_lesson_id = target.current_lesson_id
+                if target_lesson_id is not None and target_lesson_id in conflict:
+                    conflict.discard(target_lesson_id)
+                    target.conflict_set |= conflict
+                    break
+                conflict |= target.conflict_set
+                if target_lesson_id is not None:
+                    conflict.discard(target_lesson_id)
+                stack.pop()
+                stats.backjumps += 1
 
     return SearchOutcome(kind="failure", state=deepest_state)
 
@@ -166,6 +230,7 @@ class Solver:
             stats = SearchStats(
                 candidates_tried=accumulator.candidates_tried,
                 backtracks=accumulator.backtracks,
+                backjumps=accumulator.backjumps,
                 duration_seconds=duration,
             )
 

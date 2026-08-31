@@ -1,0 +1,80 @@
+# Deploy: staging on every green push to main, production only on a
+# published GitHub Release (a deliberate, human action — never an
+# accidental consequence of merging a PR).
+#
+# Both jobs are gated on a GitHub Environment, so the required secrets are
+# scoped per-environment rather than shared repo-wide, and production can
+# additionally require a manual reviewer approval (configured in the repo's
+# Settings -> Environments, not here).
+#
+# Required per-environment secrets/variables:
+#   FIREBASE_SERVICE_ACCOUNT  (secret)   JSON key with Firebase Hosting +
+#                                        Firestore deploy permission
+#   FIREBASE_PROJECT_ID       (variable) e.g. taskforge-485bf
+#   VITE_FIREBASE_API_KEY     (variable) public Firebase web config
+#   VITE_FIREBASE_AUTH_DOMAIN (variable)
+#   VITE_FIREBASE_APP_ID      (variable)
+#   VITE_API_BASE_URL         (variable) deployed backend origin
+#   VITE_RECAPTCHA_SITE_KEY   (variable) public reCAPTCHA v2 site key
+#
+# The backend (FastAPI) is not deployed here: it needs a hosting target
+# chosen first (Cloud Run is the natural fit alongside Firebase). Adding it
+# is a matter of one more job — deliberately left out rather than guessed
+# at, so this file never claims to deploy something it does not.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend + Firestore rules
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'release' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_RECAPTCHA_SITE_KEY: ${{ vars.VITE_RECAPTCHA_SITE_KEY }}
+          # Never the emulator in a deployed build, regardless of what a
+          # local .env happened to say.
+          VITE_USE_FIREBASE_EMULATOR: 'false'
+
+      - name: Authenticate to Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy Firestore rules and indexes
+        run: npx --yes firebase-tools@13 deploy --only firestore --project "${{ vars.FIREBASE_PROJECT_ID }}" --non-interactive
+
+      - name: Deploy Hosting
+        run: npx --yes firebase-tools@13 deploy --only hosting --project "${{ vars.FIREBASE_PROJECT_ID }}" --non-interactive

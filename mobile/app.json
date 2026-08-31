@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "TimeForge",
+    "slug": "timeforge",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.timeforge.app" },
+    "android": {
+      "package": "com.timeforge.app",
+      "adaptiveIcon": { "backgroundColor": "#4338ca" }
+    },
+    "plugins": ["expo-notifications"],
+    "extra": {
+      "apiBaseUrl": "http://localhost:8000",
+      "firebase": {
+        "apiKey": "",
+        "authDomain": "",
+        "projectId": "",
+        "appId": ""
+      }
+    }
+  }
+}

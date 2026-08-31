@@ -3,10 +3,12 @@ request/response shapes for the scheduling workflow endpoints (generate,
 validate-move, apply-move, publish, compare) — docs/03-ARCHITECTURE.md #26.
 """
 
-from datetime import datetime
+from datetime import datetime, time
 
 from pydantic import BaseModel, Field
 
+from app.application.use_cases.my_timetable import MyTimetable
+from app.application.use_cases.schedule_analytics import ScheduleAnalytics
 from app.domain.constraints.violation import Severity
 from app.domain.models import (
     Schedule,
@@ -14,6 +16,7 @@ from app.domain.models import (
     ScheduleScoreSummary,
     ScheduleVersion,
     ScheduleVersionStatus,
+    Weekday,
 )
 from app.domain.scheduling.infeasibility import BottleneckReport, InfeasibilityResult
 from app.domain.scheduling.result import ScheduleResult, SearchStats, SolverStatus
@@ -145,6 +148,7 @@ def infeasibility_to_response(result: InfeasibilityResult) -> InfeasibilityRespo
 class SearchStatsResponse(BaseModel):
     candidates_tried: int
     backtracks: int
+    backjumps: int
     duration_seconds: float
 
 
@@ -152,6 +156,7 @@ def stats_to_response(stats: SearchStats) -> SearchStatsResponse:
     return SearchStatsResponse(
         candidates_tried=stats.candidates_tried,
         backtracks=stats.backtracks,
+        backjumps=stats.backjumps,
         duration_seconds=stats.duration_seconds,
     )
 
@@ -200,6 +205,80 @@ class PublishRequest(BaseModel):
     expected_version_tag: int
 
 
+# --- Analytics ---
+
+
+class TeacherWorkloadResponse(BaseModel):
+    teacher_id: str
+    teacher_name: str
+    assigned_periods: int
+    max_weekly_load: int
+    load_ratio: float
+
+
+class RoomUtilizationResponse(BaseModel):
+    room_id: str
+    room_name: str
+    used_slots: int
+    available_slots: int
+    utilization_ratio: float
+
+
+class ClassCoverageResponse(BaseModel):
+    class_id: str
+    class_name: str
+    scheduled_periods: int
+    required_periods: int
+    is_complete: bool
+
+
+class ScheduleAnalyticsResponse(BaseModel):
+    total_assignments: int
+    lesson_slots_per_week: int
+    workload_spread: float
+    teacher_workloads: list[TeacherWorkloadResponse]
+    room_utilizations: list[RoomUtilizationResponse]
+    class_coverages: list[ClassCoverageResponse]
+
+
+def analytics_to_response(analytics: ScheduleAnalytics) -> ScheduleAnalyticsResponse:
+    return ScheduleAnalyticsResponse(
+        total_assignments=analytics.total_assignments,
+        lesson_slots_per_week=analytics.lesson_slots_per_week,
+        workload_spread=analytics.workload_spread,
+        teacher_workloads=[
+            TeacherWorkloadResponse(
+                teacher_id=w.teacher_id,
+                teacher_name=w.teacher_name,
+                assigned_periods=w.assigned_periods,
+                max_weekly_load=w.max_weekly_load,
+                load_ratio=w.load_ratio,
+            )
+            for w in analytics.teacher_workloads
+        ],
+        room_utilizations=[
+            RoomUtilizationResponse(
+                room_id=u.room_id,
+                room_name=u.room_name,
+                used_slots=u.used_slots,
+                available_slots=u.available_slots,
+                utilization_ratio=u.utilization_ratio,
+            )
+            for u in analytics.room_utilizations
+        ],
+        class_coverages=[
+            ClassCoverageResponse(
+                class_id=c.class_id,
+                class_name=c.class_name,
+                scheduled_periods=c.scheduled_periods,
+                required_periods=c.required_periods,
+                is_complete=c.is_complete,
+            )
+            for c in analytics.class_coverages
+        ],
+    )
+
+
 # --- Compare ---
 
 
@@ -216,3 +295,47 @@ class CompareVersionsResponse(BaseModel):
     removed: list[AssignmentDiffEntry]
     moved: list[AssignmentDiffEntry]
     unchanged_count: int
+
+
+# --- My timetable (mobile) ---
+
+
+class TimetableEntryResponse(BaseModel):
+    assignment_id: str
+    day_id: str
+    weekday: Weekday
+    time_period_id: str
+    period_index: int
+    start_time: time
+    end_time: time
+    class_name: str
+    room_name: str
+    subject_code: str
+    subject_name: str
+
+
+class MyTimetableResponse(BaseModel):
+    version_id: str | None = None
+    entries: list[TimetableEntryResponse]
+
+
+def my_timetable_to_response(timetable: MyTimetable) -> MyTimetableResponse:
+    return MyTimetableResponse(
+        version_id=timetable.version_id,
+        entries=[
+            TimetableEntryResponse(
+                assignment_id=e.assignment_id,
+                day_id=e.day_id,
+                weekday=e.weekday,
+                time_period_id=e.time_period_id,
+                period_index=e.period_index,
+                start_time=e.start_time,
+                end_time=e.end_time,
+                class_name=e.class_name,
+                room_name=e.room_name,
+                subject_code=e.subject_code,
+                subject_name=e.subject_name,
+            )
+            for e in timetable.entries
+        ],
+    )

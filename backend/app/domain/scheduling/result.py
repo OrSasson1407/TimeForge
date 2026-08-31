@@ -28,6 +28,12 @@ class SolverStatus(StrEnum):
 class SearchStats:
     candidates_tried: int = 0
     backtracks: int = 0
+    #: Decision frames skipped outright by conflict-directed backjumping —
+    #: each one is a whole subtree chronological backtracking would have
+    #: re-explored to no purpose (see `scheduling/conflicts.py`). Always
+    #: <= backtracks; a consistently zero value on a hard problem would mean
+    #: the conflict sets are degenerating to "blame everything".
+    backjumps: int = 0
     duration_seconds: float = 0.0
 
 

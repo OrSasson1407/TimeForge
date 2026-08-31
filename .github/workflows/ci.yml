@@ -1,0 +1,120 @@
+# CI: every push to main and every pull request must pass this before merge.
+# Backend and frontend run as separate jobs so a failure names which side
+# broke, and so they run in parallel rather than serially.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same PR cancels the previous, still-running check —
+# there is no value in finishing a run for a commit that is already stale.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (ruff, pyright, pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check .
+
+      - name: Type-check (pyright)
+        run: uv run pyright
+
+      # No .env exists in CI, so Settings() falls back to its defaults —
+      # which is exactly what the test suite wants (it overrides every
+      # repository with an in-memory fake and never touches real Firebase
+      # or the emulator; see backend/tests/api/conftest.py).
+      - name: Tests (pytest)
+        run: uv run pytest
+
+  frontend:
+    name: Frontend (tsc, eslint, prettier, vitest, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Tests
+        run: npm run test
+
+      # Proves the production bundle actually builds — `tsc -b` alone does
+      # not catch a Vite-level failure (a bad import path, an asset that
+      # cannot be resolved). VITE_* vars are build-time inlined, so real
+      # values are not needed to prove the build itself is sound.
+      - name: Build
+        run: npm run build
+
+  mobile:
+    name: Mobile (tsc, jest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      # Pure-logic tests only (grouping, offline cache, API client) — they
+      # run in Node. Screen rendering and push delivery need a simulator or
+      # a handset and are deliberately out of CI's scope; see mobile/README.
+      - name: Tests
+        run: npm test

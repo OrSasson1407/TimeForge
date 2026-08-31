@@ -23,6 +23,7 @@ from app.domain.models import (
     AuditEntityType,
     AuditEvent,
     Availability,
+    DeviceToken,
     EmailVerification,
     OwnerType,
     ReschedulingEvent,
@@ -388,3 +389,34 @@ class FakeIdentityAdmin:
         created some other way)."""
         self._uid_by_email[email] = uid
         self._email_by_uid[uid] = email
+
+
+class FakeDeviceTokenRepository:
+    def __init__(self) -> None:
+        self._by_token: dict[str, DeviceToken] = {}
+
+    def get(self, token: str) -> DeviceToken | None:
+        return self._by_token.get(token)
+
+    def save(self, device: DeviceToken) -> None:
+        self._by_token[device.token] = device
+
+    def list_for_school(self, school_id: str) -> list[DeviceToken]:
+        return [d for d in self._by_token.values() if d.school_id == school_id]
+
+    def delete(self, token: str) -> None:
+        self._by_token.pop(token, None)
+
+
+class FakePushSender:
+    """Records every dispatch instead of calling FCM (docs/07-CODE_STANDARDS.md
+    #23). `invalid_tokens` lets a test simulate the provider reporting a
+    permanently-dead handset, which is what drives token pruning."""
+
+    def __init__(self, invalid_tokens: set[str] | None = None) -> None:
+        self.sent: list[tuple[list[str], str, str]] = []
+        self.invalid_tokens = invalid_tokens or set()
+
+    def send_to_tokens(self, tokens: list[str], *, title: str, body: str) -> list[str]:
+        self.sent.append((list(tokens), title, body))
+        return [t for t in tokens if t in self.invalid_tokens]

@@ -3,6 +3,7 @@ from app.domain.models.value_objects import TimeSlot
 from app.domain.scheduling import EMPTY_SCHEDULE_STATE, build_lesson_domains, compute_degrees
 from app.domain.scheduling.heuristics import (
     forward_check,
+    forward_check_detailed,
     least_constraining_value_order,
     select_next_lesson,
 )
@@ -108,3 +109,44 @@ def test_forward_check_returns_none_when_a_domain_becomes_empty(
     domains = ((lesson, (SLOT_A,)),)
 
     assert forward_check(EMPTY_SCHEDULE_STATE, domains, problem) is None
+
+
+def test_incremental_forward_check_matches_a_full_rescan(
+    two_days, three_periods, two_classes, two_teachers, two_rooms
+) -> None:
+    """The correctness property behind the incremental path: because
+    `resolve_placement` only ever consults state *at the slot being tested*,
+    re-checking just the slot that was consumed must produce byte-identical
+    domains to re-checking everything. If this ever diverges, the search is
+    silently exploring a different (wrong) tree — so it is asserted for
+    every slot in the problem, not just a convenient one.
+    """
+    requirements = [
+        LessonRequirement(
+            id="req_c1_math", school_id="s1", class_id="c1", subject_id="MATH", weekly_periods=2
+        ),
+        LessonRequirement(
+            id="req_c2_math", school_id="s1", class_id="c2", subject_id="MATH", weekly_periods=2
+        ),
+    ]
+    problem = build_problem(
+        days=two_days,
+        periods=three_periods,
+        classes=two_classes,
+        teachers=two_teachers,
+        rooms=two_rooms,
+        requirements=requirements,
+    )
+    domains = build_lesson_domains(problem.lessons, problem)
+    placed, rest = domains[0], domains[1:]
+
+    for slot in placed[1]:
+        candidate = problem.resolve_placement(placed[0], slot, EMPTY_SCHEDULE_STATE)
+        assert candidate is not None
+        state = EMPTY_SCHEDULE_STATE.with_assignment(candidate)
+
+        full = forward_check_detailed(state, rest, problem)
+        incremental = forward_check_detailed(state, rest, problem, changed_slot=slot)
+
+        assert incremental.pruned == full.pruned
+        assert (incremental.wiped_out is None) == (full.wiped_out is None)

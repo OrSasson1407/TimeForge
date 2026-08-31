@@ -17,8 +17,14 @@ from app.application.use_cases.generate_schedule import (
     GenerateScheduleUseCase,
 )
 from app.application.use_cases.list_violations import ListViolationsUseCase
+from app.application.use_cases.my_timetable import MyTimetable, MyTimetableUseCase, TimetableEntry
+from app.application.use_cases.notify_schedule_published import NotifySchedulePublishedUseCase
 from app.application.use_cases.publish_schedule import PublishScheduleUseCase
 from app.application.use_cases.reschedule import RescheduleOutcome, RescheduleUseCase
+from app.application.use_cases.schedule_analytics import (
+    ScheduleAnalytics,
+    ScheduleAnalyticsUseCase,
+)
 from app.application.use_cases.validate_move import MoveValidationResult, ValidateMoveUseCase
 
 __all__ = [
@@ -30,8 +36,14 @@ __all__ = [
     "GenerateScheduleUseCase",
     "ListViolationsUseCase",
     "MoveValidationResult",
+    "MyTimetable",
+    "MyTimetableUseCase",
+    "NotifySchedulePublishedUseCase",
     "PublishScheduleUseCase",
     "RescheduleOutcome",
     "RescheduleUseCase",
+    "ScheduleAnalytics",
+    "ScheduleAnalyticsUseCase",
+    "TimetableEntry",
     "ValidateMoveUseCase",
 ]

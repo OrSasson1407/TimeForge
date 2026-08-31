@@ -50,6 +50,14 @@ export function useScheduleViolations(schoolId: string | undefined, versionId: s
   })
 }
 
+export function useScheduleAnalytics(schoolId: string | undefined, versionId: string | undefined) {
+  return useQuery({
+    queryKey: ['schedule-analytics', schoolId, versionId],
+    queryFn: () => scheduleApi.analytics(schoolId!, versionId!),
+    enabled: !!schoolId && !!versionId,
+  })
+}
+
 export function useCompareVersions(
   schoolId: string | undefined,
   fromVersionId: string | undefined,
@@ -96,6 +104,9 @@ export function useApplyMove(schoolId: string | undefined, versionId: string | u
       void queryClient.invalidateQueries({ queryKey: ['schedule-versions', schoolId] })
       void queryClient.invalidateQueries({
         queryKey: ['schedule-violations', schoolId, versionId],
+      })
+      void queryClient.invalidateQueries({
+        queryKey: ['schedule-analytics', schoolId, versionId],
       })
     },
   })

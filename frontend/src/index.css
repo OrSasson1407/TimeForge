@@ -881,6 +881,41 @@ kbd {
   opacity: 0.4;
 }
 
+/* --- Live collaboration presence --- */
+
+.collab-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.35em 0.75em;
+  margin: 0.5rem 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-success-bg);
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+
+.collab-presence > span[aria-hidden] {
+  color: var(--color-success);
+}
+
+/* --- Analytics meters --- */
+
+.analytics-meter {
+  display: block;
+  width: 100%;
+  min-width: 80px;
+  height: 8px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.analytics-meter > span {
+  display: block;
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
 .timetable-cell-violation {
   background: var(--color-danger-bg);
 }

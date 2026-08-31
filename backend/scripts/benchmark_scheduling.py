@@ -27,7 +27,7 @@ def run() -> None:
 
     print(
         f"{'Scenario':<10} {'Classes':>7} {'Lessons':>8} {'Status':>11} "
-        f"{'Duration(s)':>12} {'Candidates':>11} {'Backtracks':>11} "
+        f"{'Duration(s)':>12} {'Candidates':>11} {'Backtracks':>11} {'Backjumps':>10} "
         f"{'SoftPenalty':>12} {'Quality':>8}"
     )
     for scenario in scenarios:
@@ -46,6 +46,7 @@ def run() -> None:
             f"{scenario.name:<10} {len(problem.classes):>7} {len(problem.lessons):>8} "
             f"{result.status.value:>11} {result.stats.duration_seconds:>12.3f} "
             f"{result.stats.candidates_tried:>11} {result.stats.backtracks:>11} "
+            f"{result.stats.backjumps:>10} "
             f"{soft_penalty:>12} {quality:>8}"
         )
         if result.score and result.score.breakdown:

@@ -4,7 +4,10 @@ This module only wires up the app (middleware, routers). Business logic
 lives in app/application and app/domain (docs/01-CLAUDE.md rule 4).
 """
 
+import asyncio
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +18,9 @@ from app.api.routers import (
     auth,
     availability,
     catalog,
+    collaboration,
     health,
+    notifications,
     public,
     schedule,
     scheduling_config,
@@ -26,6 +31,7 @@ from app.api.schemas.common import ErrorDetail, ErrorEnvelope
 from app.core.config import Settings, get_settings
 from app.core.errors import DomainError
 from app.core.logging import setup_logging
+from app.infrastructure.realtime import broadcaster
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +80,15 @@ def _domain_error_handler(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content=envelope.model_dump())
 
 
+@asynccontextmanager
+async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    # Synchronous (threadpool) request handlers need a handle on the serving
+    # loop to fan out realtime notifications — see
+    # `Broadcaster.publish_threadsafe`.
+    broadcaster.bind_loop(asyncio.get_running_loop())
+    yield
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     setup_logging(settings.log_level)
@@ -83,6 +98,7 @@ def create_app() -> FastAPI:
         title="TimeForge API",
         description="Constraint-based school timetabling and dynamic rescheduling API.",
         version="0.1.0",
+        lifespan=_lifespan,
     )
 
     app.add_middleware(
@@ -111,6 +127,8 @@ def create_app() -> FastAPI:
     app.include_router(scheduling_config.router)
     app.include_router(schedule.router)
     app.include_router(audit.router)
+    app.include_router(collaboration.router)
+    app.include_router(notifications.router)
 
     return app
 
